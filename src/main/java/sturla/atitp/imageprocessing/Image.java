@@ -3,6 +3,9 @@ package sturla.atitp.imageprocessing;
 import java.awt.Point;
 import java.awt.image.BufferedImage;
 
+import sturla.atitp.imageprocessing.edgeDetector.EdgeDetector;
+import sturla.atitp.imageprocessing.synthesization.SynthesizationType;
+
 public interface Image {
 	
 	public static enum Channel {
@@ -76,5 +79,37 @@ public interface Image {
 	public BufferedImage toBufferedImage();
 	
 	public BufferedImage thresholdBinaryImage(double t);
+	
+	public void applyIsotropicDiffusion(int iterations);
+	
+	public void applyAnisotropicDiffusion(double lambda, int iterations, EdgeDetector bd);
+	
+	public void applyRobertsBorderDetection(SynthesizationType st);
+	
+	public void applyPrewittBorderDetection(SynthesizationType st);
+	
+	public void applySobelBorderDetection(SynthesizationType st);
+	
+	public void synthesize(SynthesizationType st, Image ... chnls);
+	
+	public void applyMaskABorderDetection(SynthesizationType st);
+	
+	public void applyMaskBKirshBorderDetection(SynthesizationType st);
+	
+	public void applyMaskCBorderDetection(SynthesizationType st);
+	
+	public void applyMaskDBorderDetection(SynthesizationType st);
+	
+	public void applyLaplaceMask(int w, int h, int endW, int endH);
+	
+	public void applyLaplaceVarianceMask(int varianceThreshold, int w, int h, int endW, int endH);
+	
+	public void applyLaplaceGaussianMask(int maskSize, double sigma, int w, int h, int endW, int endH);
+
+	public void applyZeroCrossing(double threshold);
+	
+	public void globalThreshold();
+	
+	public void otsuThreshold();
 
 }

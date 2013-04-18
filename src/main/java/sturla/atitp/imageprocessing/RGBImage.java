@@ -5,6 +5,8 @@ import java.awt.Point;
 import java.awt.image.BufferedImage;
 
 import sturla.atitp.app.Utils;
+import sturla.atitp.imageprocessing.edgeDetector.EdgeDetector;
+import sturla.atitp.imageprocessing.synthesization.SynthesizationType;
 
 public class RGBImage implements Image{
 	
@@ -361,4 +363,144 @@ public class RGBImage implements Image{
 		return buff;
 	}
 
+	@Override
+	public void applyIsotropicDiffusion(int iterations){
+		this.red.applyIsotropicDiffusion(iterations);
+		this.green.applyIsotropicDiffusion(iterations);
+		this.red.applyIsotropicDiffusion(iterations);
+	}
+	
+	@Override
+	public void applyAnisotropicDiffusion(double lambda, int iterations, EdgeDetector bd){
+		this.red.applyAnisotropicDiffusion(lambda, iterations, bd);
+		this.green.applyAnisotropicDiffusion(lambda, iterations, bd);
+		this.red.applyAnisotropicDiffusion(lambda, iterations, bd);
+	}
+
+	@Override
+	public void applyPrewittBorderDetection(SynthesizationType st) {
+		TwoMaskContainer mc = MaskFactory.buildPrewittMasks();
+		applyTwoMasksAndSynth(mc, st);
+	}
+
+	@Override
+	public void applyRobertsBorderDetection(SynthesizationType st) {
+		TwoMaskContainer mc = MaskFactory.buildRobertsMasks();
+		applyTwoMasksAndSynth(mc, st);
+	}
+
+	@Override
+	public void applySobelBorderDetection(SynthesizationType st) {
+		TwoMaskContainer mc = MaskFactory.buildSobelMasks();
+		applyTwoMasksAndSynth(mc, st);
+	}
+	
+	@Override
+	public void applyMaskABorderDetection(SynthesizationType st){
+		FourMaskContainer mc = MaskFactory.buildMaskA();
+		applyFourMasksAndSynth(mc, st);
+	}
+	
+	@Override
+	public void applyMaskBKirshBorderDetection(SynthesizationType st){
+		FourMaskContainer mc = MaskFactory.buildMaskBKirsh();
+		applyFourMasksAndSynth(mc, st);
+	}
+	
+	@Override
+	public void applyMaskCBorderDetection(SynthesizationType st){
+		FourMaskContainer mc = MaskFactory.buildMaskC();
+		applyFourMasksAndSynth(mc, st);
+	}
+	
+	@Override
+	public void applyMaskDBorderDetection(SynthesizationType st){
+		FourMaskContainer mc = MaskFactory.buildMaskD();
+		applyFourMasksAndSynth(mc, st);
+	}
+	
+	private void applyTwoMasksAndSynth(TwoMaskContainer mc, SynthesizationType st){
+		RGBImage imageCopy = (RGBImage) this.copy();
+		
+		this.applyMask(mc.getDXMask(), 1, 1, imageCopy.getWidth() -1, imageCopy.getHeight()-1);
+		imageCopy.applyMask(mc.getDYMask(), 1, 1, imageCopy.getWidth()-1, imageCopy.getHeight()-1);
+		
+		this.synthesize(st, imageCopy);
+	}
+	
+	private void applyFourMasksAndSynth(FourMaskContainer mc, SynthesizationType st){
+		RGBImage imageCopy2 = (RGBImage) this.copy();
+		RGBImage imageCopy3 = (RGBImage) this.copy();
+		RGBImage imageCopy4 = (RGBImage) this.copy();
+		
+		this.applyMask(mc.getMask0(), 1, 1, this.getWidth()-1, this.getHeight()-1);
+		imageCopy2.applyMask(mc.getMask45(), 1, 1, imageCopy2.getWidth()-1, imageCopy2.getHeight()-1);
+		imageCopy3.applyMask(mc.getMask90(), 1, 1, imageCopy3.getWidth()-1, imageCopy3.getHeight()-1);
+		imageCopy4.applyMask(mc.getMask135(), 1, 1, imageCopy4.getWidth()-1, imageCopy4.getHeight()-1);
+		
+		this.synthesize(st, imageCopy2, imageCopy3, imageCopy4);
+	}
+
+	@Override
+	public void synthesize(SynthesizationType st, Image ... imgs){
+		Image[] cimgs = imgs;
+		
+		SingleChannel[] redChnls = new SingleChannel[cimgs.length];
+		SingleChannel[] greenChnls = new SingleChannel[cimgs.length];
+		SingleChannel[] blueChnls = new SingleChannel[cimgs.length];
+		
+		for(int i = 0 ; i < cimgs.length ; i++ ){
+			redChnls[i] = ((RGBImage)cimgs[i]).red;
+			greenChnls[i] = ((RGBImage)cimgs[i]).green;
+			blueChnls[i] = ((RGBImage)cimgs[i]).blue;
+		}
+		
+		this.red.synthesize(st, redChnls);
+		this.green.synthesize(st, greenChnls);
+		this.blue.synthesize(st, blueChnls);
+		
+	}
+	
+	@Override
+	public void applyLaplaceMask(int w, int h, int endW, int endH){
+		this.applyMask(MaskFactory.buildLaplaceMask(), w, h, endW, endH);
+	}
+	
+	@Override
+	public void applyLaplaceVarianceMask(int varianceThreshold, int w, int h, int endW, int endH) {
+		this.applyMask(MaskFactory.buildLaplaceMask(), w, h, endW, endH);
+
+		this.red.localVarianceEvaluation(varianceThreshold);
+		this.green.localVarianceEvaluation(varianceThreshold);
+		this.blue.localVarianceEvaluation(varianceThreshold);
+	}
+	
+	@Override
+	public void applyLaplaceGaussianMask(int maskSize, double sigma, int w, int h, int endW, int endH) {
+		this.applyMask(MaskFactory.buildLaplaceGaussianMask(maskSize, sigma), w, h, endW, endH);
+	}
+	
+	@Override
+	public void applyZeroCrossing(double threshold){
+		this.red.zeroCross(threshold);
+		this.green.zeroCross(threshold);
+		this.blue.zeroCross(threshold);
+	}
+	
+	@Override
+	public void globalThreshold() {
+		this.red.globalThreshold();
+		this.green.globalThreshold();
+		this.blue.globalThreshold();
+	}
+	
+	@Override
+	public void otsuThreshold() {
+		this.red.otsuThreshold();
+		this.green.otsuThreshold();
+		this.blue.otsuThreshold();
+	}
+	
+	
+	
 }

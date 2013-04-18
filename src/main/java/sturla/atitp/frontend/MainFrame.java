@@ -17,6 +17,7 @@ import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
+import javax.swing.JRadioButton;
 import javax.swing.JSlider;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
@@ -30,25 +31,36 @@ import org.apache.sanselan.ImageReadException;
 import sturla.atitp.app.ImageLoader;
 import sturla.atitp.app.ImageSaver;
 import sturla.atitp.frontend.imageops.AddImageOperation;
+import sturla.atitp.frontend.imageops.AnisotropicDiffusionOperation;
 import sturla.atitp.frontend.imageops.ContrastOperation;
 import sturla.atitp.frontend.imageops.DynamicRangeCompressionOperation;
 import sturla.atitp.frontend.imageops.EqualizeImageOperation;
 import sturla.atitp.frontend.imageops.ExponentialNoiseOperation;
+import sturla.atitp.frontend.imageops.GaussianFilterOperation;
+import sturla.atitp.frontend.imageops.GlobalUmbralizationOperation;
 import sturla.atitp.frontend.imageops.HighPassOperation;
 import sturla.atitp.frontend.imageops.HistogramOperation;
 import sturla.atitp.frontend.imageops.ImageOperation;
 import sturla.atitp.frontend.imageops.ImageOperationParameters;
+import sturla.atitp.frontend.imageops.IsotropicDiffusionOperation;
 import sturla.atitp.frontend.imageops.LowPassOperation;
 import sturla.atitp.frontend.imageops.MedianPassOperation;
 import sturla.atitp.frontend.imageops.MultiplyImageOperation;
 import sturla.atitp.frontend.imageops.MultiplyScalarOperation;
 import sturla.atitp.frontend.imageops.NegativeImageOperation;
+import sturla.atitp.frontend.imageops.OtsuUmbralizationOperation;
+import sturla.atitp.frontend.imageops.PrewittEdgeDetectorOperation;
 import sturla.atitp.frontend.imageops.RayleighNoiseOperation;
+import sturla.atitp.frontend.imageops.RobertsEdgeDetectorOperation;
 import sturla.atitp.frontend.imageops.SaltPepperOperation;
+import sturla.atitp.frontend.imageops.SobelEdgeDetectorOperation;
 import sturla.atitp.frontend.imageops.SubtractImageOperation;
 import sturla.atitp.frontend.imageops.ThresholdBinaryOperation;
 import sturla.atitp.frontend.imageops.TreshHoldOperation;
 import sturla.atitp.frontend.imageops.WhiteNoiseOperation;
+import sturla.atitp.imageprocessing.edgeDetector.LeclercEdgeDetector;
+import sturla.atitp.imageprocessing.edgeDetector.LorentzEdgeDetector;
+import sturla.atitp.imageprocessing.synthesization.SynthesizationType;
 
 public class MainFrame extends JFrame {
 
@@ -72,12 +84,22 @@ public class MainFrame extends JFrame {
 	private JTextField coordX2;
 	private JTextField coordY2;
 	private JTextField maskSize;
+	private JTextField value1;
+	private JTextField value2;
 	
 	private JTextField rectWidth;
 	private JTextField rectHeight;
 
 	private JButton doItButton;
 	private DraggableComponent rectangle;
+
+	private JRadioButton leclercRadioButton;
+	private JRadioButton lorentzRadioButton;
+
+	private JRadioButton absRadioButton;
+	private JRadioButton avgRadioButton;
+	private JRadioButton minRadioButton;
+	private JRadioButton maxRadioButton;
 
 	public MainFrame() {
 		initUI();
@@ -90,10 +112,86 @@ public class MainFrame extends JFrame {
 		initMenu();
 		initTextFields();
 		initSliders();
+		initEdgeDetectorRadioButtions();
+		initSynthetizationRadioButtons();
 		setTitle("ATI: TP 1");
 		setSize(2000, 700);
 		setLocationRelativeTo(null);
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
+	}
+
+	private void initEdgeDetectorRadioButtions() {
+		leclercRadioButton = new JRadioButton("Leclerc", true);
+		lorentzRadioButton = new JRadioButton("Lorentz");
+
+		leclercRadioButton.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				leclercRadioButton.setSelected(true);
+				lorentzRadioButton.setSelected(!leclercRadioButton.isSelected());
+			}
+		});
+
+		lorentzRadioButton.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				lorentzRadioButton.setSelected(true);
+				leclercRadioButton.setSelected(!lorentzRadioButton.isSelected());
+			}
+		});		
+	}
+
+	private void initSynthetizationRadioButtons() {
+		maxRadioButton = new JRadioButton("Maximum");
+		minRadioButton = new JRadioButton("Minimum");
+		avgRadioButton = new JRadioButton("Average");
+		absRadioButton = new JRadioButton("Norm 2", true);
+
+		maxRadioButton.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				maxRadioButton.setSelected(true);
+				minRadioButton.setSelected(!maxRadioButton.isSelected());
+				avgRadioButton.setSelected(!maxRadioButton.isSelected());
+				absRadioButton.setSelected(!maxRadioButton.isSelected());
+			}
+		});
+
+		minRadioButton.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				minRadioButton.setSelected(true);
+				maxRadioButton.setSelected(!minRadioButton.isSelected());
+				avgRadioButton.setSelected(!minRadioButton.isSelected());
+				absRadioButton.setSelected(!minRadioButton.isSelected());
+			}
+		});
+		
+		avgRadioButton.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				avgRadioButton.setSelected(true);
+				maxRadioButton.setSelected(!avgRadioButton.isSelected());
+				minRadioButton.setSelected(!avgRadioButton.isSelected());
+				absRadioButton.setSelected(!avgRadioButton.isSelected());
+			}
+		});
+
+		absRadioButton.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				absRadioButton.setSelected(true);
+				maxRadioButton.setSelected(!absRadioButton.isSelected());
+				minRadioButton.setSelected(!absRadioButton.isSelected());
+				avgRadioButton.setSelected(!absRadioButton.isSelected());
+			}
+		});		
 	}
 
 	private void initTextFields() {
@@ -105,6 +203,9 @@ public class MainFrame extends JFrame {
 		rectWidth = new JTextField("100");
 		rectHeight = new JTextField("100");
 		maskSize = new JTextField("5");
+		value1 = new JTextField("Value1");
+		value2 = new JTextField("Value2");
+				
 		ActionListener act = new ActionListener() {
 		    public void actionPerformed(ActionEvent e) {
 		    	int w = Integer.parseInt(rectWidth.getText());
@@ -121,6 +222,9 @@ public class MainFrame extends JFrame {
 		rectWidth.setBounds(300, 600, 30, 30);
 		rectHeight.setBounds(350, 600, 30, 30);
 		maskSize.setBounds(400, 600, 30, 30);
+		value1.setBounds(450, 600, 30, 30);
+		value2.setBounds(500, 600, 30, 30);
+		
 		panel.add(maskSize);
 		panel.add(rectWidth);
 		panel.add(rectHeight);
@@ -129,7 +233,11 @@ public class MainFrame extends JFrame {
 		panel.add(coordY1);
 		panel.add(coordX2);
 		panel.add(coordY2);
+		panel.add(value1);
+		panel.add(value2);
 		displayTextFields(false);
+		value1.setVisible(false);
+		value2.setVisible(false);
 	}
 	
 	private void setCoords(int x1, int y1, int x2, int y2) {
@@ -202,6 +310,28 @@ public class MainFrame extends JFrame {
 		if (maskSize.isVisible()) {
 			params.maskSize = Integer.valueOf(maskSize.getText());
 		}
+		if (value1.isVisible()) {
+			params.value = Double.valueOf(value1.getText());
+		}
+		if (value2.isVisible()) {
+			params.value2 = Double.valueOf(value2.getText());
+		}
+		if(leclercRadioButton.isSelected()) {
+			params.bd = new LeclercEdgeDetector((int)params.value2);	//Without explicit cast everything goes BADDD
+		} else if(lorentzRadioButton.isSelected()) {
+			params.bd = new LorentzEdgeDetector((int)params.value2);	//Without explicit cast everything goes BADDDD
+		}
+		if(maxRadioButton.isSelected()) {
+			params.st = SynthesizationType.MAX;
+		} else if(minRadioButton.isSelected()) {
+			params.st = SynthesizationType.MIN;
+		} else if(avgRadioButton.isSelected()) {
+			params.st = SynthesizationType.AVG;
+		} else if(absRadioButton.isSelected()) {
+			params.st = SynthesizationType.ABS;
+		}
+		
+		
 		return params;
 	}
 
@@ -453,14 +583,125 @@ public class MainFrame extends JFrame {
 				maskSize.setVisible(false);
 			}
 		});
+		
+		JMenuItem gaussianFilterMask = new JMenuItem("Gaussian Filter");
+		gaussianFilterMask.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent event) {
+				MainFrame.this.currOperation = new GaussianFilterOperation();
+				MainFrame.this.hideSliders();
+				displayTextFields(true);
+			}
+		});
+		masks.add(gaussianFilterMask);
+		
+		JMenuItem anisotropicDiffusion = new JMenuItem("Anisotropic Diffusion");
+		anisotropicDiffusion.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent event) {
+				MainFrame.this.currOperation = new AnisotropicDiffusionOperation();
+				MainFrame.this.hideSliders();
+				displayTextFields(false);
+				rectangle.setVisible(false);
+				maskSize.setVisible(true);
+				value1.setVisible(true);
+				value2.setVisible(true);
+				EdgeDetectorDialog edgeDetectorDialog = new EdgeDetectorDialog(leclercRadioButton, lorentzRadioButton);
+				edgeDetectorDialog.setVisible(true);
+			}
+		});
+		
+		JMenuItem isotropicDiffusion = new JMenuItem("Isotropic Diffusion");
+		isotropicDiffusion.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent event) {
+				MainFrame.this.currOperation = new IsotropicDiffusionOperation();
+				MainFrame.this.hideSliders();
+				displayTextFields(false);
+				rectangle.setVisible(false);
+				maskSize.setVisible(true);
+			}
+		});
+		
+		
+		JMenu edgeDetectors = new JMenu("Edge Detectors");
+		
+		JMenuItem robertsEdgeDetector = new JMenuItem("Roberts Edge Detector");
+		robertsEdgeDetector.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent event) {
+				MainFrame.this.currOperation = new RobertsEdgeDetectorOperation();
+				MainFrame.this.hideSliders();
+				displayTextFields(false);
+				rectangle.setVisible(false);
+				maskSize.setVisible(true);
+				SynthetizationDialog synthetizationDialog = new SynthetizationDialog(maxRadioButton, minRadioButton, avgRadioButton, absRadioButton);
+				synthetizationDialog.setVisible(true);
+			}
+		});
+		
+		JMenuItem prewittEdgeDetector = new JMenuItem("Prewitt Edge Detector");
+		prewittEdgeDetector.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent event) {
+				MainFrame.this.currOperation = new PrewittEdgeDetectorOperation();
+				MainFrame.this.hideSliders();
+				displayTextFields(false);
+				rectangle.setVisible(false);
+				maskSize.setVisible(true);
+				SynthetizationDialog synthetizationDialog = new SynthetizationDialog(maxRadioButton, minRadioButton, avgRadioButton, absRadioButton);
+				synthetizationDialog.setVisible(true);
+			}
+		});
+		
+		JMenuItem sobelEdgeDetector = new JMenuItem("Sobel Edge Detector");
+		sobelEdgeDetector.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent event) {
+				MainFrame.this.currOperation = new SobelEdgeDetectorOperation();
+				MainFrame.this.hideSliders();
+				displayTextFields(false);
+				rectangle.setVisible(false);
+				maskSize.setVisible(true);
+				SynthetizationDialog synthetizationDialog = new SynthetizationDialog(maxRadioButton, minRadioButton, avgRadioButton, absRadioButton);
+				synthetizationDialog.setVisible(true);
+			}
+		});
+		
+		edgeDetectors.add(robertsEdgeDetector);
+		edgeDetectors.add(prewittEdgeDetector);
+		edgeDetectors.add(sobelEdgeDetector);
+				
+		JMenuItem globalUmbralization = new JMenuItem("Global Umbralization");
+		globalUmbralization.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent event) {
+				MainFrame.this.currOperation = new GlobalUmbralizationOperation();
+				MainFrame.this.hideSliders();
+				displayTextFields(false);
+				rectangle.setVisible(false);
+			}
+		});
+		
+		JMenuItem otsuUmbralization = new JMenuItem("Otsu Umbralization");
+		otsuUmbralization.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent event) {
+				MainFrame.this.currOperation = new OtsuUmbralizationOperation();
+				MainFrame.this.hideSliders();
+				displayTextFields(false);
+				rectangle.setVisible(false);
+			}
+		});
+		
+		
+		
 		extra.add(histogram);
 		extra.add(equalize);
 		extra.add(dynamicCompr);
 		extra.add(contrast);
+		extra.add(isotropicDiffusion);
+		extra.add(anisotropicDiffusion);
+		extra.add(globalUmbralization);
+		extra.add(otsuUmbralization);
+		
 		menubar.add(file);
 		menubar.add(noise);
 		menubar.add(arithmeticMenu);
 		menubar.add(masks);
+		menubar.add(edgeDetectors);
 		menubar.add(extra);
 		currentImageLabel = new ImageLabelContainer(this, this.panel);
 		secondImageLabel = new ImageLabelContainer(this, this.panel);
@@ -503,17 +744,13 @@ public class MainFrame extends JFrame {
 		parameterSlider1 = new JSlider(JSlider.HORIZONTAL, minValue, maxValue,
 				initValue);
 		parameterField1.setVisible(true);
-		parameterField1
-				.setText(String.format("%.4g", (double) initValue / 200));
+		parameterField1.setText(String.format("%.4g", (double) initValue / 200));
 		parameterSlider1.setBounds(200, 550, 300, 50);
 		parameterSlider1.setVisible(true);
 		parameterSlider1.setLayout(null);
 		parameterSlider1.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent event) {
-				parameterField1.setText(String
-						.format("%.4g",
-								(double) MainFrame.this.parameterSlider1
-										.getValue() / 200));
+				parameterField1.setText(String.format("%.4g", (double) MainFrame.this.parameterSlider1.getValue() / 200));
 				parameterField1.repaint();
 				MainFrame.this.doOperation();
 			}
