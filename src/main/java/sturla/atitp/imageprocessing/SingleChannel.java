@@ -578,12 +578,14 @@ class SingleChannel implements Cloneable {
 	}
 	
 	private double[] getProbabilitiesOfEachColorLevel() {
-		double[] probabilities = new double[MAX_CHANNEL_COLOR];
+		double[] probabilities = new double[MAX_CHANNEL_COLOR + 1];
 	
 		for( int x = 0 ; x < width ; x++ ) {
 			for( int y = 0 ; y < height ; y++) {
 				int aColorPixel = (int)this.getPixel(x, y);
-				probabilities[aColorPixel - 1] += 1;
+				if (aColorPixel < 0) aColorPixel = 0;
+				if (aColorPixel > MAX_CHANNEL_COLOR) aColorPixel = MAX_CHANNEL_COLOR;
+				probabilities[aColorPixel] += 1;
 			}
 		}
 		for(int i = 0; i < probabilities.length; i++) {

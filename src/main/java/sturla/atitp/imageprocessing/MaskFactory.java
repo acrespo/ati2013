@@ -105,7 +105,7 @@ public class MaskFactory {
 		return new TwoMaskContainer(dx, dy);
 	}
 	
-	private static Mask buildMaskA0(){
+	public static Mask buildMaskA0(){
 		Mask mask = new Mask(3);
 		
 		mask.setPixel(-1, -1, 1);
@@ -132,7 +132,7 @@ public class MaskFactory {
 		return new FourMaskContainer(mask0, mask45, mask90, mask135);
 	}
 	
-	private static Mask buildMaskBKirsh0(){
+	public static Mask buildMaskBKirsh0(){
 		Mask mask = new Mask(3);
 		
 		mask.setPixel(-1, -1, 5);
@@ -159,7 +159,7 @@ public class MaskFactory {
 		return new FourMaskContainer(mask0, mask45, mask90, mask135);
 	}
 	
-	private static Mask buildMaskC0(){
+	public static Mask buildMaskC0(){
 		Mask mask = new Mask(3);
 		
 		mask.setPixel(-1, -1, 1);
@@ -186,7 +186,7 @@ public class MaskFactory {
 		return new FourMaskContainer(mask0, mask45, mask90, mask135);
 	}
 	
-	private static Mask buildMaskD0(){
+	public static Mask buildMaskD0(){
 		Mask mask = new Mask(3);
 		
 		mask.setPixel(-1, -1, 1);

@@ -367,14 +367,14 @@ public class RGBImage implements Image{
 	public void applyIsotropicDiffusion(int iterations){
 		this.red.applyIsotropicDiffusion(iterations);
 		this.green.applyIsotropicDiffusion(iterations);
-		this.red.applyIsotropicDiffusion(iterations);
+		this.blue.applyIsotropicDiffusion(iterations);
 	}
 	
 	@Override
 	public void applyAnisotropicDiffusion(double lambda, int iterations, EdgeDetector bd){
 		this.red.applyAnisotropicDiffusion(lambda, iterations, bd);
 		this.green.applyAnisotropicDiffusion(lambda, iterations, bd);
-		this.red.applyAnisotropicDiffusion(lambda, iterations, bd);
+		this.blue.applyAnisotropicDiffusion(lambda, iterations, bd);
 	}
 
 	@Override
@@ -499,6 +499,35 @@ public class RGBImage implements Image{
 		this.red.otsuThreshold();
 		this.green.otsuThreshold();
 		this.blue.otsuThreshold();
+	}
+	
+	@Override
+	public void binaryGlobalThreshold() {
+		SingleChannel ch = getGreyChannel();
+		ch.globalThreshold();
+		red = ch;
+		green = ch;
+		blue = ch;
+	}
+	
+	@Override
+	public void binaryOtsuThreshold() {
+		SingleChannel ch = getGreyChannel();
+		ch.otsuThreshold();
+		red = ch;
+		green = ch;
+		blue = ch;
+	}
+	
+	private SingleChannel getGreyChannel() {
+		SingleChannel ch = new SingleChannel(getWidth(), getHeight());
+		for (int i = 0; i < getHeight(); i ++) {
+			for (int j = 0; j < getWidth(); j ++) {
+				double grey = (red.getPixel(i, j) + green.getPixel(i, j) + blue.getPixel(i, j)) / 3;
+				ch.setPixel(i, j, grey);
+			}
+		}
+		return ch;
 	}
 	
 	

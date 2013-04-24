@@ -111,5 +111,10 @@ public interface Image {
 	public void globalThreshold();
 	
 	public void otsuThreshold();
+	
+	public void binaryGlobalThreshold();
+	
+	public void binaryOtsuThreshold();
+
 
 }

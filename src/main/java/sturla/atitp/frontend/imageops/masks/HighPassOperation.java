@@ -1,6 +1,8 @@
-package sturla.atitp.frontend.imageops;
+package sturla.atitp.frontend.imageops.masks;
 
 import sturla.atitp.frontend.ImageLabelContainer;
+import sturla.atitp.frontend.imageops.ImageOperation;
+import sturla.atitp.frontend.imageops.ImageOperationParameters;
 import sturla.atitp.imageprocessing.Image;
 import sturla.atitp.imageprocessing.MaskFactory;
 

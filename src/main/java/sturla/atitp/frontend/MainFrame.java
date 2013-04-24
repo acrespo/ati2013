@@ -30,34 +30,40 @@ import org.apache.sanselan.ImageReadException;
 
 import sturla.atitp.app.ImageLoader;
 import sturla.atitp.app.ImageSaver;
-import sturla.atitp.frontend.imageops.AddImageOperation;
 import sturla.atitp.frontend.imageops.AnisotropicDiffusionOperation;
 import sturla.atitp.frontend.imageops.ContrastOperation;
 import sturla.atitp.frontend.imageops.DynamicRangeCompressionOperation;
 import sturla.atitp.frontend.imageops.EqualizeImageOperation;
-import sturla.atitp.frontend.imageops.ExponentialNoiseOperation;
-import sturla.atitp.frontend.imageops.GaussianFilterOperation;
-import sturla.atitp.frontend.imageops.GlobalUmbralizationOperation;
-import sturla.atitp.frontend.imageops.HighPassOperation;
 import sturla.atitp.frontend.imageops.HistogramOperation;
 import sturla.atitp.frontend.imageops.ImageOperation;
 import sturla.atitp.frontend.imageops.ImageOperationParameters;
 import sturla.atitp.frontend.imageops.IsotropicDiffusionOperation;
-import sturla.atitp.frontend.imageops.LowPassOperation;
-import sturla.atitp.frontend.imageops.MedianPassOperation;
-import sturla.atitp.frontend.imageops.MultiplyImageOperation;
 import sturla.atitp.frontend.imageops.MultiplyScalarOperation;
 import sturla.atitp.frontend.imageops.NegativeImageOperation;
-import sturla.atitp.frontend.imageops.OtsuUmbralizationOperation;
 import sturla.atitp.frontend.imageops.PrewittEdgeDetectorOperation;
-import sturla.atitp.frontend.imageops.RayleighNoiseOperation;
 import sturla.atitp.frontend.imageops.RobertsEdgeDetectorOperation;
-import sturla.atitp.frontend.imageops.SaltPepperOperation;
 import sturla.atitp.frontend.imageops.SobelEdgeDetectorOperation;
-import sturla.atitp.frontend.imageops.SubtractImageOperation;
-import sturla.atitp.frontend.imageops.ThresholdBinaryOperation;
-import sturla.atitp.frontend.imageops.TreshHoldOperation;
-import sturla.atitp.frontend.imageops.WhiteNoiseOperation;
+import sturla.atitp.frontend.imageops.binaryops.AddImageOperation;
+import sturla.atitp.frontend.imageops.binaryops.MultiplyImageOperation;
+import sturla.atitp.frontend.imageops.binaryops.SubtractImageOperation;
+import sturla.atitp.frontend.imageops.masks.GaussianFilterOperation;
+import sturla.atitp.frontend.imageops.masks.HighPassOperation;
+import sturla.atitp.frontend.imageops.masks.LowPassOperation;
+import sturla.atitp.frontend.imageops.masks.MaskA;
+import sturla.atitp.frontend.imageops.masks.MaskC;
+import sturla.atitp.frontend.imageops.masks.MaskD;
+import sturla.atitp.frontend.imageops.masks.MaskKirsh;
+import sturla.atitp.frontend.imageops.masks.MedianPassOperation;
+import sturla.atitp.frontend.imageops.noise.ExponentialNoiseOperation;
+import sturla.atitp.frontend.imageops.noise.RayleighNoiseOperation;
+import sturla.atitp.frontend.imageops.noise.SaltPepperOperation;
+import sturla.atitp.frontend.imageops.noise.WhiteNoiseOperation;
+import sturla.atitp.frontend.imageops.tresh.BinaryGlobalUmbralizationOperation;
+import sturla.atitp.frontend.imageops.tresh.BinaryOtsuUmbralizationOperation;
+import sturla.atitp.frontend.imageops.tresh.GlobalUmbralizationOperation;
+import sturla.atitp.frontend.imageops.tresh.OtsuUmbralizationOperation;
+import sturla.atitp.frontend.imageops.tresh.ThresholdBinaryOperation;
+import sturla.atitp.frontend.imageops.tresh.TreshHoldOperation;
 import sturla.atitp.imageprocessing.edgeDetector.LeclercEdgeDetector;
 import sturla.atitp.imageprocessing.edgeDetector.LorentzEdgeDetector;
 import sturla.atitp.imageprocessing.synthesization.SynthesizationType;
@@ -256,6 +262,8 @@ public class MainFrame extends JFrame {
 		rectWidth.setVisible(b);
 		rectHeight.setVisible(b);
 		maskSize.setVisible(b);
+		value1.setVisible(false);
+		value2.setVisible(false);
 	}
 
 	private void initSliders() {
@@ -590,9 +598,47 @@ public class MainFrame extends JFrame {
 				MainFrame.this.currOperation = new GaussianFilterOperation();
 				MainFrame.this.hideSliders();
 				displayTextFields(true);
+				value2.setVisible(true);
 			}
 		});
 		masks.add(gaussianFilterMask);
+		JMenuItem maskA = new JMenuItem("Mask A");
+		maskA.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent event) {
+				MainFrame.this.currOperation = new MaskA();
+				MainFrame.this.hideSliders();
+				displayTextFields(true);
+			}
+		});
+		masks.add(maskA);
+		JMenuItem maskKirsh = new JMenuItem("Mask Kirsh");
+		maskKirsh.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent event) {
+				MainFrame.this.currOperation = new MaskKirsh();
+				MainFrame.this.hideSliders();
+				displayTextFields(true);
+			}
+		});
+		masks.add(maskKirsh);
+		JMenuItem maskC = new JMenuItem("Mask C");
+		maskC.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent event) {
+				MainFrame.this.currOperation = new MaskC();
+				MainFrame.this.hideSliders();
+				displayTextFields(true);
+			}
+		});
+		masks.add(maskC);
+		JMenuItem maskD = new JMenuItem("Mask D");
+		maskD.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent event) {
+				MainFrame.this.currOperation = new MaskD();
+				MainFrame.this.hideSliders();
+				displayTextFields(true);
+			}
+		});
+		masks.add(maskD);
+		
 		
 		JMenuItem anisotropicDiffusion = new JMenuItem("Anisotropic Diffusion");
 		anisotropicDiffusion.addActionListener(new ActionListener() {
@@ -601,7 +647,7 @@ public class MainFrame extends JFrame {
 				MainFrame.this.hideSliders();
 				displayTextFields(false);
 				rectangle.setVisible(false);
-				maskSize.setVisible(true);
+				maskSize.setVisible(false);
 				value1.setVisible(true);
 				value2.setVisible(true);
 				EdgeDetectorDialog edgeDetectorDialog = new EdgeDetectorDialog(leclercRadioButton, lorentzRadioButton);
@@ -616,7 +662,7 @@ public class MainFrame extends JFrame {
 				MainFrame.this.hideSliders();
 				displayTextFields(false);
 				rectangle.setVisible(false);
-				maskSize.setVisible(true);
+				value1.setVisible(true);
 			}
 		});
 		
@@ -685,6 +731,25 @@ public class MainFrame extends JFrame {
 				rectangle.setVisible(false);
 			}
 		});
+		JMenuItem binaryGlobalUmbralization = new JMenuItem("Binary Global Umbralization");
+		binaryGlobalUmbralization.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent event) {
+				MainFrame.this.currOperation = new BinaryGlobalUmbralizationOperation();
+				MainFrame.this.hideSliders();
+				displayTextFields(false);
+				rectangle.setVisible(false);
+			}
+		});
+		
+		JMenuItem binaryOtsuUmbralization = new JMenuItem("Binary Otsu Umbralization");
+		binaryOtsuUmbralization.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent event) {
+				MainFrame.this.currOperation = new BinaryOtsuUmbralizationOperation();
+				MainFrame.this.hideSliders();
+				displayTextFields(false);
+				rectangle.setVisible(false);
+			}
+		});
 		
 		
 		
@@ -696,6 +761,8 @@ public class MainFrame extends JFrame {
 		extra.add(anisotropicDiffusion);
 		extra.add(globalUmbralization);
 		extra.add(otsuUmbralization);
+		extra.add(binaryGlobalUmbralization);
+		extra.add(binaryOtsuUmbralization);
 		
 		menubar.add(file);
 		menubar.add(noise);

@@ -1,19 +1,19 @@
-package sturla.atitp.frontend.imageops;
-
-import java.awt.Point;
+package sturla.atitp.frontend.imageops.tresh;
 
 import sturla.atitp.frontend.ImageLabelContainer;
+import sturla.atitp.frontend.imageops.ImageOperation;
+import sturla.atitp.frontend.imageops.ImageOperationParameters;
 import sturla.atitp.imageprocessing.Image;
 
-public class MedianPassOperation extends ImageOperation {
+public class GlobalUmbralizationOperation extends ImageOperation {
 
 	@Override
 	public void performOperation(ImageLabelContainer op1,
 			ImageLabelContainer op2, ImageLabelContainer result,
 			ImageOperationParameters params) {
+
 		Image img = op1.getImage().copy();
-		img.applyMedianMask(new Point(params.maskSize, params.maskSize), params.x1, params.x2, 
-				params.y1, params.y2);
+		img.globalThreshold();
 		result.setImage(img);
 	}
 
