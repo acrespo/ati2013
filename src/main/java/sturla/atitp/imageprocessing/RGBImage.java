@@ -1,8 +1,8 @@
 package sturla.atitp.imageprocessing;
 
 import java.awt.Color;
-import java.awt.Point;
 import java.awt.image.BufferedImage;
+import java.util.List;
 
 import sturla.atitp.app.Utils;
 import sturla.atitp.imageprocessing.edgeDetector.EdgeDetector;
@@ -531,5 +531,146 @@ public class RGBImage implements Image{
 	}
 	
 	
+	@Override
+	public void applyCannyBorderDetection() {
+		this.red.applyCannyBorderDetection();
+		this.green.applyCannyBorderDetection();
+		this.blue.applyCannyBorderDetection();
+	}
+	
+	@Override
+	public void thresholdWithHysteresis(double lowThreshold, double highThreshold) {
+		this.red.thresholdWithHysteresis(lowThreshold, highThreshold);
+		this.green.thresholdWithHysteresis(lowThreshold, highThreshold);
+		this.blue.thresholdWithHysteresis(lowThreshold, highThreshold);
+	}
+
+	@Override
+	public void applySusanMask(boolean detectBorders, boolean detectCorners) {
+		this.red.applySusanMask(detectBorders, detectCorners);
+		this.green.applySusanMask(detectBorders, detectCorners);
+		this.blue.applySusanMask(detectBorders, detectCorners);
+	}
+
+	@Override
+	public void houghTransformForLines() {
+		RGBImage backup = (RGBImage) copy();
+		
+		this.red.houghTransformForLines(0.75, 1, 1);
+		this.green = this.red;
+		this.blue = this.red;
+		
+		this.add(backup);
+	}
+
+	@Override
+	public void houghTransformForCircles() {
+		RGBImage backup = (RGBImage) copy();
+		
+		this.red.houghTransformForCircles(5, 1, 1, 2);
+		this.green = this.red;
+		this.blue = this.red;
+		
+		this.add(backup);
+	}
+	
+	@Override
+	public void applyHarrisCornerDetector(int size, Double sigma) {
+		this.red.applyHarrisCornerDetector(size, sigma);
+		this.green.applyHarrisCornerDetector(size, sigma);
+		this.blue.applyHarrisCornerDetector(size, sigma);		
+	}
+
+	@Override
+	public boolean validPixel(int x, int y) {
+		return this.red.validPixel(x, y);
+	}
+
+	@Override
+	public void tracking(List<Point> selection) {	
+		TitaFunction tita = new TitaFunction(selection, this.red.getHeight(), this.red.getWidth());
+		int times = (int)(1.5 * Math.max(this.red.getHeight(), this.red.getWidth()));
+		boolean changes = true;
+		List<Point> in = tita.getIn();
+		List<Point> out = tita.getOut();
+		double[] averageIn = getAverage(in);
+		double[] averageOut = getAverage(out); 
+		
+		while((times > 0) && changes){
+			changes = false;			
+			List<Point> lOut = tita.getlOut();
+			for(Point p: lOut){
+				if( Fd(p, averageIn, averageOut) > 0){
+					tita.setlIn(p);
+					for(Point y: p.N4()){
+						if(tita.isOut(y)){
+							tita.setlOut(y);
+						}
+					}
+					for(Point y: p.N4()){
+						if(tita.islIn(y)){
+							tita.setIn(y);
+						}
+					}
+					changes = true;
+				}
+			}
+			List<Point> lIn = tita.getlIn();
+			for(Point p: lIn){
+				if( Fd(p, averageIn, averageOut) < 0){
+					tita.setlOut(p);
+					for(Point y: p.N4()){
+						if(tita.isIn(y)){
+							tita.setlIn(y);
+						}
+					}
+					for(Point y: p.N4()){
+						if(tita.islOut(y)){
+							tita.setOut(y);
+						}
+					}
+					changes = true;
+				}
+			}				
+			times--;
+		}		
+		selection.clear();
+		selection.addAll(tita.getIn());
+	}
+	
+	private double[] getAverage(List<Point> l){
+		double[] ret = new double[3];
+		ret[0] = 0;
+		ret[1] = 0;
+		ret[2] = 0;
+		for(Point c: l){
+			ret[0]+=this.red.getPixel(c.x, c.y);
+		}
+		ret[0]=ret[0]/l.size();
+		
+		for(Point c: l){
+			ret[1]+=this.green.getPixel(c.x, c.y);
+		}
+		ret[1]=ret[1]/l.size();
+		
+		for(Point c: l){
+			ret[2]+=this.blue.getPixel(c.x, c.y);
+		}
+		ret[2]=ret[2]/l.size();
+		
+		return ret;
+	}
+
+	private double Fd(Point p, double[] averageIn, double[] averageOut) {	
+		double p1, p2;
+		double red, green, blue;
+		red = this.red.getPixel(p.x, p.y);
+		green = this.green.getPixel(p.x, p.y);
+		blue =  this.blue.getPixel(p.x, p.y);
+		
+		p1 = Math.sqrt(Math.pow((averageIn[0] - red), 2) + Math.pow((averageIn[1] - green), 2) + Math.pow((averageIn[2] - blue), 2));
+		p2 = Math.sqrt(Math.pow((averageOut[0] - red), 2) + Math.pow((averageOut[1] - green), 2) + Math.pow((averageOut[2] - blue), 2));
+		return p2 - p1;
+	}
 	
 }

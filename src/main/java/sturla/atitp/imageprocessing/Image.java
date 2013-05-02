@@ -1,7 +1,7 @@
 package sturla.atitp.imageprocessing;
 
-import java.awt.Point;
 import java.awt.image.BufferedImage;
+import java.util.List;
 
 import sturla.atitp.imageprocessing.edgeDetector.EdgeDetector;
 import sturla.atitp.imageprocessing.synthesization.SynthesizationType;
@@ -116,5 +116,21 @@ public interface Image {
 	
 	public void binaryOtsuThreshold();
 
+	public void applyCannyBorderDetection();
+	
+	public void thresholdWithHysteresis(double lowThreshold, double highThreshold);
+	
+	public void applySusanMask(boolean detectBorders, boolean detectCorners);
+
+	public void houghTransformForLines();
+	
+	public void houghTransformForCircles();
+
+	public void applyHarrisCornerDetector(int i, Double valueOf);
+
+	public boolean validPixel(int x, int y);
+
+	public void tracking(List<Point> selection);
+	
 
 }

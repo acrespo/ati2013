@@ -2,8 +2,15 @@ package sturla.atitp.imageprocessing;
 
 import java.awt.Point;
 import java.awt.image.BufferedImage;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
 import java.util.TreeSet;
+
+import org.jfree.data.Range;
 
 import sturla.atitp.imageprocessing.edgeDetector.EdgeDetector;
 import sturla.atitp.imageprocessing.synthesization.SynthesizationFunction;
@@ -659,5 +666,528 @@ public void zeroCross(double th){
 		this.channel = chnl.channel;
 	}
 	
-}
+	public void applyCannyBorderDetection() {
+		List<SingleChannel> channelList = new ArrayList<SingleChannel>();
+		for(int maskSize = 3; maskSize <= 5; maskSize += 2) {
+			for(double sigma = 0.05; sigma <= 0.25; sigma += 0.05) {
+				SingleChannel each = applyCannyBorderDetection(maskSize, sigma);
+				channelList.add(each);
+			}
+		}
+		
+		SingleChannel initialChannel = channelList.get(0); 
+		SingleChannel[] restOfChannels = channelList.subList(1, channelList.size()).toArray(new SingleChannel[channelList.size() - 1]);
+		initialChannel.synthesize(SynthesizationType.MAX, restOfChannels);
+		this.channel = initialChannel.channel;
+	}
+	
+	private void applyMask(Mask mask) {
+		applyMask(mask, 0, 0, getWidth() - 1, getHeight() - 1);
+	}
+	
+	
+	public void applyHarrisCornerDetector(int maskSize, double sigma){
+		applyMask(MaskFactory.buildGaussianMask(maskSize, sigma));
+	    TwoMaskContainer sobelOperator = MaskFactory.buildSobelMasks();
+	    double[] iX, iY;
+        double[] iX2, iY2, iXiY;
+        double[] hXY;
+        int wh = width*height;
+        
+        SingleChannel Dx = this.clone();
+        SingleChannel Dy = this.clone();		
+		Dx.applyMask(sobelOperator.getDXMask());
+		Dy.applyMask(sobelOperator.getDYMask());		
+		iX = Dx.channel;
+		iY = Dy.channel;
+        
+        iX2 = new double[iX.length];
+        iY2 = new double[iY.length];
+        iXiY = new double[iX.length];
+        hXY = new double[iX.length];
+        
+        for (int i = 0 ; i < iX2.length ; i++) {
+                iX2[i] = iX[i] * iX[i];
+                iY2[i] = iY[i] * iY[i];
+                iXiY[i] = iX[i] * iY[i];
+        }
 
+        for (int i = 0 ; i < wh ; i++) {
+                hXY[i] = iX2[i]*iY2[i] - iXiY[i]*iXiY[i] / (iX2[i] + iY2[i] + Double.MAX_VALUE);
+        }
+        
+        findLocalMax(hXY, width, height);
+        
+        this.channel = hXY;	    
+	}
+	
+	 private void findLocalMax(double[] hXY, int w, int h) {         
+         for (int i = 0 ; i < w * h ; i++) {
+                 if (i < w || i >= w*h - w || i % w == 0 || i % w == w - 1) {
+                         hXY[i] = 0d;
+                 } else {                         
+                         if (!isCornerLocalMax(hXY, i, w, h)) {
+                                 hXY[i] = 0;
+                         } else {
+                                 hXY[i] = 255;
+                         }
+                 }
+         }
+ }
+ 
+	 private boolean isCornerLocalMax(double[] hXY, int idx, int w, int h) {
+         boolean isMax = true;
+         int voffset;
+         int hoffset;         
+         for (int j = 0 ; j < 3 && isMax == true; j++) {
+                 voffset = (j - 1) * w;
+                 for (int i = 0 ; i < 3 && isMax == true ; i++) {
+                         hoffset = i - 1;                         
+                         if (i != 1 || j != 1) {
+                                 if (hXY[idx] <= hXY[idx + voffset + hoffset]) {
+                                         isMax = false;
+                                 }
+                         }
+                 }
+         }         
+         return isMax;
+	 }
+	
+	 private SingleChannel applyCannyBorderDetection(int maskSize, double sigma) {
+		SingleChannel channelToModify = clone();
+		channelToModify.applyMask(MaskFactory.buildGaussianMask(maskSize, sigma));
+	
+		TwoMaskContainer mc = MaskFactory.buildSobelMasks();
+		SingleChannel G1 = channelToModify.clone();
+		G1.applyMask(mc.getDXMask());
+		SingleChannel G2 = channelToModify.clone();
+		G2.applyMask(mc.getDYMask());
+		
+		SingleChannel direction = new SingleChannel(width, height);
+		for( int x = 0 ; x < width ; x++ ) {
+			for( int y = 0 ; y < height ; y++) {
+				double pxG1 = G1.getPixel(x, y);
+				double pxG2 = G2.getPixel(x, y);
+				double anAngle = 0;
+				if(pxG2 != 0) {
+					anAngle = Math.atan(pxG1 / pxG2);
+				}
+				anAngle *= (180 / Math.PI);
+				direction.setPixel(x, y, anAngle);
+			}
+		}
+		
+		G1.synthesize(SynthesizationType.ABS, G2);
+		channelToModify.channel = G1.channel;
+		channelToModify.suppressNoMaxs(direction);
+		double globalThresholdValue = channelToModify.getGlobalThresholdValue();
+		channelToModify.thresholdWithHysteresis(globalThresholdValue, globalThresholdValue + 30);
+		return channelToModify;
+	}
+	
+	private void suppressNoMaxs(SingleChannel directionChannel) {
+		for( int x = 1 ; x < width - 1 ; x++ ) {
+			for( int y = 1 ; y < height - 1 ; y++) {
+				double pixel = getPixel(x, y);
+				if(pixel == MIN_CHANNEL_COLOR) {
+					continue;
+				}
+				
+				double direction = directionChannel.getPixel(x, y);
+				double neighbor1 = 0;
+				double neighbor2 = 0;
+				if(direction >= -90 && direction < -45) {
+					neighbor1 = getPixel(x, y - 1);
+					neighbor2 = getPixel(x, y + 1);
+				} else if(direction >= -45 && direction < 0) {
+					neighbor1 = getPixel(x + 1, y - 1);
+					neighbor2 = getPixel(x - 1, y + 1);
+				} else if(direction >= 0 && direction < 45) {
+					neighbor1 = getPixel(x + 1, y);
+					neighbor2 = getPixel(x - 1, y);
+				} else if(direction >= 45 && direction <= 90) {
+					neighbor1 = getPixel(x + 1, y + 1);
+					neighbor2 = getPixel(x - 1, y - 1);
+				}
+				
+				if(neighbor1 > pixel || neighbor2 > pixel) {
+					setPixel(x, y, MIN_CHANNEL_COLOR);
+				}
+			}
+		}
+	}
+	
+	public void thresholdWithHysteresis(double lowThreshold, double highThreshold) {
+		double blackColor = MIN_CHANNEL_COLOR;
+		double whiteColor = MAX_CHANNEL_COLOR;
+		
+		SingleChannel thresholdedChannelOutsider = clone();
+		for( int x = 0 ; x < width ; x++ ) {
+			for( int y = 0 ; y < height ; y++) {
+				double pixel = this.getPixel(x, y);
+				double colorToApply = pixel;
+				if(pixel < lowThreshold) {
+					colorToApply = blackColor;
+				} else if(pixel > highThreshold) {
+					colorToApply = whiteColor;
+				}
+				thresholdedChannelOutsider.setPixel(x, y, colorToApply);
+			}
+		}
+		
+		SingleChannel thresholdedChannelInBetween = thresholdedChannelOutsider.clone();
+		for( int x = 0 ; x < width ; x++ ) {
+			for( int y = 0 ; y < height; y++) {
+				double pixel = this.getPixel(x, y);
+				if(pixel >= lowThreshold && pixel <= highThreshold) {
+					boolean isBorderNeighbor1 = y > 0 && thresholdedChannelOutsider.getPixel(x, y - 1) == whiteColor;
+					boolean isBorderNeighbor2 = x > 0 && thresholdedChannelOutsider.getPixel(x - 1, y) == whiteColor;
+					boolean isBorderNeighbor3 = y < height - 1 && thresholdedChannelOutsider.getPixel(x, y + 1) == whiteColor;
+					boolean isBorderNeighbor4 = x < width - 1 && thresholdedChannelOutsider.getPixel(x + 1, y) == whiteColor;
+					if(isBorderNeighbor1 || isBorderNeighbor2 || isBorderNeighbor3 || isBorderNeighbor4) {
+						thresholdedChannelInBetween.setPixel(x, y, whiteColor);
+					} else {
+						thresholdedChannelInBetween.setPixel(x, y, blackColor);
+					}
+				}
+			}
+		}
+		
+		this.channel = thresholdedChannelInBetween.channel;
+	}
+	
+	public void applySusanMask(boolean detectBorders, boolean detectCorners) {
+		double blackColor = MIN_CHANNEL_COLOR;
+		double whiteColor = MAX_CHANNEL_COLOR;
+		
+		Mask mask = MaskFactory.buildSusanMask();
+		SingleChannel newChannel = new SingleChannel(this.width, this.height);
+		for( int x = 0 ; x < width ; x++ ){
+			for( int y = 0 ; y < height ; y++){
+				double newPixelValue = blackColor;
+				double s = applySusanPixelMask(x, y, mask);
+				if(detectBorders && isBorder(s) || detectCorners && isCorner(s)) {
+					newPixelValue = whiteColor;
+				}
+				newChannel.setPixel(x, y, newPixelValue);
+			}
+		}
+		this.channel = newChannel.channel;
+	}
+	
+	private boolean isBorder(double s) {
+		double lowLimit = 0.5 - (0.75 - 0.5) / 2;
+		double highLimit = 0.5 + (0.75 - 0.5) / 2;
+		
+		return s > lowLimit && s <= highLimit;
+	}
+	
+	private boolean isCorner(double s) {
+		double lowLimit = 0.75 - (0.75 - 0.5) / 2;
+		double highLimit = 0.75 + (0.75 - 0.5) / 2;
+		
+		return s > lowLimit && s <= highLimit;
+	}
+	
+	private double applySusanPixelMask(int x, int y, Mask mask) {
+		boolean ignoreByX = x < mask.getWidth() / 2 || x > this.getWidth() - mask.getWidth() / 2;
+		boolean ignoreByY = y < mask.getHeight() / 2 || y > this.getHeight() - mask.getHeight() / 2;
+		if(ignoreByX || ignoreByY) {
+			return this.getPixel(x, y);
+		}
+		
+		final int maxThreshold = 27;
+		int amountOfPixelSameColor = 0;
+		double centralPixel = this.getPixel(x, y);
+		for(int i = - mask.getWidth() / 2 ; i <= mask.getWidth() / 2; i++) {
+			for(int j = - mask.getHeight() / 2; j <= mask.getHeight() / 2; j++) {
+				if(this.validPixel(x + i, y + j) && mask.getValue(i, j) == 1) {
+					double eachPixel = this.getPixel(x + i, y + j);
+					if(Math.abs(centralPixel - eachPixel) < maxThreshold) {
+						amountOfPixelSameColor += 1;
+					}
+				}
+			}
+		}
+		
+		final int amountOfPixelsInMask = 37;
+		double s = 1 - amountOfPixelSameColor / (amountOfPixelsInMask * 1.0);
+		return s;
+	}
+	
+	/*
+	 * Hough for lines...
+	 * 
+	 */
+	
+	public void houghTransformForLines(double eps, double roDiscretization, double thetaDiscretization) {
+//		long time = System.currentTimeMillis();
+		
+		double whiteColor = MAX_CHANNEL_COLOR;
+		double D = Math.max(width, height);
+		Range roRange = new Range(- Math.sqrt(2) * D, Math.sqrt(2) * D + roDiscretization);
+		Range thetaRange = new Range(-90, 90 + thetaDiscretization);
+		
+		int roSize = (int)(Math.abs(roRange.getUpperBound() - roRange.getLowerBound()) / roDiscretization);
+		int thetaSize = (int)(Math.abs(thetaRange.getUpperBound() - thetaRange.getLowerBound()) / thetaDiscretization);
+		int[][] A = new int[roSize][thetaSize];
+		
+//		time = System.currentTimeMillis() - time;
+//		System.out.println("Initialization: " + time);
+//		time = System.currentTimeMillis();
+		
+		for(int x = 0 ; x < width ; x++) {
+			for(int y = 0 ; y < height ; y++) {
+				double pixel = getPixel(x, y);
+				if(pixel == whiteColor) {
+					for(int theta = 0; theta < thetaSize; theta++) {
+						double thetaValue = thetaRange.getLowerBound() + theta * thetaDiscretization;
+						double thetaTerm = x * Math.cos(thetaValue * Math.PI / 180) - y * Math.sin(thetaValue * Math.PI / 180);
+						for(int ro = 0; ro < roSize; ro++) {
+							double roValue = roRange.getLowerBound() + ro * roDiscretization;
+							double total = roValue - thetaTerm;
+							if(Math.abs(total) < eps) {
+								A[ro][theta] += 1;
+							}
+						}
+					}
+				}
+			}
+		}
+		
+//		time = System.currentTimeMillis() - time;
+//		System.out.println("Fill matrix Buckets: " + time);
+//		time = System.currentTimeMillis();
+		
+		Set<BucketForLines> allBuckets = new HashSet<BucketForLines>();
+		for(int ro = 0; ro < roSize; ro++) {
+			for(int theta = 0; theta < thetaSize; theta++) {
+				BucketForLines newBucket = new BucketForLines(ro, theta, A[ro][theta]);
+				allBuckets.add(newBucket);
+			}
+		}
+		
+//		time = System.currentTimeMillis() - time;
+//		System.out.println("Fill matrix A: " + time);
+//		time = System.currentTimeMillis();
+		
+		List<BucketForLines> allBucketsAsList = new ArrayList<BucketForLines>(allBuckets);
+		Collections.sort(allBucketsAsList);
+		
+//		time = System.currentTimeMillis() - time;
+//		System.out.println("Sort list: " + time);
+//		time = System.currentTimeMillis();
+		
+		SingleChannel newChannel = new SingleChannel(width, height);
+		int maxHits = allBucketsAsList.get(0).hits;
+		if(maxHits >1)
+		for(BucketForLines b : allBucketsAsList) {
+			if(b.hits < maxHits) {
+				break;
+			}
+			
+			double roValue = roRange.getLowerBound() + b.ro * roDiscretization /*+ roDiscretization / 2*/;
+			double thetaValue = thetaRange.getLowerBound() + b.theta * thetaDiscretization/* + thetaDiscretization / 2*/;
+
+			for(int x = 0 ; x < width ; x++) {
+				for(int y = 0 ; y < height; y++) {
+					double thetaTerm = x * Math.cos(thetaValue * Math.PI / 180) - y * Math.sin(thetaValue * Math.PI / 180);
+					double total = roValue - thetaTerm;
+					if(Math.abs(total) < eps && validPixel(x, y)) {
+						newChannel.setPixel(x, y, whiteColor);
+					}
+				}
+			}
+			
+		}
+		
+//		time = System.currentTimeMillis() - time;
+//		System.out.println("Draw lines: " + time);
+//		time = System.currentTimeMillis();
+
+		this.channel = newChannel.channel;
+	}
+	
+	private static class BucketForLines implements Comparable<BucketForLines> {
+		double ro;
+		double theta;
+		int hits;
+
+		public BucketForLines(double ro, double theta, int hits) {
+			this.ro = ro;
+			this.theta = theta;
+			this.hits = hits;
+		}
+		
+		@Override
+		public boolean equals(Object obj) {
+			return ro == ((BucketForLines)obj).ro && theta == ((BucketForLines)obj).theta;
+		}
+		
+		@Override
+		public int hashCode() {
+			return (int)(3 * ro + 5 * theta);
+		}
+
+		@Override
+		public int compareTo(BucketForLines obj) {
+			return obj.hits - hits;
+		}
+		
+		@Override
+		public String toString() {
+			return "Ro: " + ro + " Theta: " + theta + " Hits: " + hits;
+		}
+			
+	}
+	
+	
+	/*
+	 * Hough for circles...
+	 * 
+	 */
+	
+	public void houghTransformForCircles(double eps, double aDiscretization, double bDiscretization, double rDiscretization) {
+//		long time = System.currentTimeMillis();
+		
+		double whiteColor = MAX_CHANNEL_COLOR;
+		Range aRange = new Range(0, width);
+		Range bRange = new Range(0, height);
+		double maxRad = Math.min(width, height);
+		Range rRange = new Range(5, maxRad);
+		
+		int aSize = (int)(Math.abs(aRange.getUpperBound() - aRange.getLowerBound()) / aDiscretization);
+		int bSize = (int)(Math.abs(bRange.getUpperBound() - bRange.getLowerBound()) / bDiscretization);
+		int rSize = (int)(Math.abs(rRange.getUpperBound() - rRange.getLowerBound()) / rDiscretization);
+		int[][][] A = new int[aSize][bSize][rSize];
+		
+//		time = System.currentTimeMillis() - time;
+//		System.out.println("Initialization: " + time);
+//		time = System.currentTimeMillis();
+		
+		for(int x = 0 ; x < width ; x++) {
+			for(int y = 0 ; y < height ; y++) {
+				double pixel = getPixel(x, y);
+				if(pixel == whiteColor) {
+					for(int a = 0; a < aSize; a++) {
+						double aValue = aRange.getLowerBound() + a * aDiscretization;
+						double aTerm = Math.pow(x - aValue, 2);
+						for(int b = 0; b < bSize; b++) {
+							double bValue = bRange.getLowerBound() + b * bDiscretization;
+							double bTerm = Math.pow(y - bValue, 2);
+							for(int r = 0; r < rSize; r++) {
+								double rValue = rRange.getLowerBound() + r * rDiscretization;
+								double rTerm = Math.pow(rValue, 2);
+								double total = rTerm - aTerm - bTerm;
+								if(Math.abs(total) < eps) {
+//									System.out.println("Por el punto: " + "(" + x + ", " + y + ")" + " pasa el: " + aValue + ", " + bValue + ", " + rValue);
+									A[a][b][r] += 1;
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+		
+//		time = System.currentTimeMillis() - time;
+//		System.out.println("Fill matrix Buckets: " + time);
+//		time = System.currentTimeMillis();
+		
+		Set<BucketForCircles> allBuckets = new HashSet<BucketForCircles>();
+		for(int a = 0; a < aSize; a++) {
+			for(int b = 0; b < bSize; b++) {
+				for(int r = 0; r < rSize; r++) {
+					if(A[a][b][r] > 0) {
+						BucketForCircles newBucket = new BucketForCircles(a, b, r, A[a][b][r]);
+						allBuckets.add(newBucket);
+					}
+				}
+			}
+		}
+		
+//		time = System.currentTimeMillis() - time;
+//		System.out.println("Fill matrix A: " + time);
+//		time = System.currentTimeMillis();
+		if(allBuckets.isEmpty())
+			return;
+		
+		List<BucketForCircles> allBucketsAsList = new ArrayList<BucketForCircles>(allBuckets);
+		Collections.sort(allBucketsAsList);
+		
+//		time = System.currentTimeMillis() - time;
+//		System.out.println("Sort list: " + time);
+//		time = System.currentTimeMillis();
+		
+		SingleChannel newChannel = new SingleChannel(width, height);
+		int maxHits = allBucketsAsList.get(0).hits;
+		if(maxHits >2)
+		for(BucketForCircles b : allBucketsAsList) {
+			if(b.hits < maxHits) {
+				break;
+			}
+			double aValue = aRange.getLowerBound() + b.a * aDiscretization/* + aDiscretization / 2*/;
+			double bValue = bRange.getLowerBound() + b.b * bDiscretization /*+ bDiscretization / 2*/;
+			double rValue = rRange.getLowerBound() + b.r * rDiscretization/* + rDiscretization / 2*/;
+//			System.out.println("Draw: " + aValue + " - " + bValue + " - " + rValue);
+			for(int x = 0 ; x < width ; x++) {
+				for(int y = 0 ; y < height; y++) {
+					double aTerm = Math.pow(x - aValue, 2);
+					double bTerm = Math.pow(y - bValue, 2);
+					double rTerm = Math.pow(rValue, 2);
+					double total = rTerm - aTerm - bTerm;
+					if(Math.abs(total) < 10 * eps && validPixel(x, y)) {
+						newChannel.setPixel(x, y, whiteColor);
+					}
+				}
+			}
+//			break;
+			
+		}
+		
+//		time = System.currentTimeMillis() - time;
+//		System.out.println("Draw lines: " + time);
+//		time = System.currentTimeMillis();
+
+		this.channel = newChannel.channel;
+	}
+	
+	private static class BucketForCircles implements Comparable<BucketForCircles> {
+		double a;
+		double b;
+		double r; 
+		int hits;
+
+		public BucketForCircles(double a, double b, double r, int hits) {
+			this.a = a;
+			this.b = b;
+			this.r = r;
+			this.hits = hits;
+		}
+		
+		@Override
+		public boolean equals(Object obj) {
+			boolean equalA = a == ((BucketForCircles)obj).a;
+			boolean equalB = b == ((BucketForCircles)obj).b;
+			boolean equalR = r == ((BucketForCircles)obj).r;
+			return equalA && equalB && equalR;
+		}
+		
+		@Override
+		public int hashCode() {
+			return (int)(3 * a + 5 * b + 7 * r);
+		}
+
+		@Override
+		public int compareTo(BucketForCircles obj) {
+			return obj.hits - hits;
+		}
+		
+		@Override
+		public String toString() {
+			return "A: " + a + " B: " + b + " R: " + r + " Hits: " + hits;
+		}
+			
+	}
+	
+}
