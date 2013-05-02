@@ -10,7 +10,7 @@ public class AnisotropicDiffusionOperation extends ImageOperation {
 			ImageLabelContainer op2, ImageLabelContainer result,
 			ImageOperationParameters params) {
 		Image img = op1.getImage().copy();
-		img.applyAnisotropicDiffusion(params.value, (int) params.value2, params.bd);
+		img.applyAnisotropicDiffusion(params.value, (int) params.maskSize, params.bd);
 		result.setImage(img);
 	}
 }

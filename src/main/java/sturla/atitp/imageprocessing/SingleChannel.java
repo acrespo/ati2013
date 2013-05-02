@@ -359,7 +359,7 @@ class SingleChannel implements Cloneable {
 				double Ceij = 1;
 				double Coij = 1;
 				
-				double resultColor = oldValueIJ + (DnIij*Cnij + DsIij*Csij + DeIij*Ceij + DoIij*Coij);
+				double resultColor = oldValueIJ + 0.25 * (DnIij*Cnij + DsIij*Csij + DeIij*Ceij + DoIij*Coij);
 				modifiedChannel.setPixel(i, j, resultColor);
 			}
 		}
@@ -613,11 +613,12 @@ public void zeroCross(double th){
 						}
 					}
 				}
-				
-				if( min < -1*th && max > th ){
-					resultChannel[y * this.getWidth() + x] = MAX_CHANNEL_COLOR;
+				double diff = max - min;
+				if ( min < 0 && max > 0 && diff > th) {
+					resultChannel[y * this.getWidth() + x] = MAX_CHANNEL_COLOR;					
 				} else {
 					resultChannel[y * this.getWidth() + x] = MIN_CHANNEL_COLOR;
+					
 				}
 				
 			}

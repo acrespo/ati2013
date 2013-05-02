@@ -48,6 +48,8 @@ import sturla.atitp.frontend.imageops.binaryops.MultiplyImageOperation;
 import sturla.atitp.frontend.imageops.binaryops.SubtractImageOperation;
 import sturla.atitp.frontend.imageops.masks.GaussianFilterOperation;
 import sturla.atitp.frontend.imageops.masks.HighPassOperation;
+import sturla.atitp.frontend.imageops.masks.LaplaceMask;
+import sturla.atitp.frontend.imageops.masks.LogMask;
 import sturla.atitp.frontend.imageops.masks.LowPassOperation;
 import sturla.atitp.frontend.imageops.masks.MaskA;
 import sturla.atitp.frontend.imageops.masks.MaskC;
@@ -325,9 +327,9 @@ public class MainFrame extends JFrame {
 			params.value2 = Double.valueOf(value2.getText());
 		}
 		if(leclercRadioButton.isSelected()) {
-			params.bd = new LeclercEdgeDetector((int)params.value2);	//Without explicit cast everything goes BADDD
+			params.bd = new LeclercEdgeDetector(params.value2);	//Without explicit cast everything goes BADDD
 		} else if(lorentzRadioButton.isSelected()) {
-			params.bd = new LorentzEdgeDetector((int)params.value2);	//Without explicit cast everything goes BADDDD
+			params.bd = new LorentzEdgeDetector(params.value2);	//Without explicit cast everything goes BADDDD
 		}
 		if(maxRadioButton.isSelected()) {
 			params.st = SynthesizationType.MAX;
@@ -638,7 +640,27 @@ public class MainFrame extends JFrame {
 			}
 		});
 		masks.add(maskD);
-		
+		JMenuItem lmask = new JMenuItem("Mask Laplace");
+		lmask.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent event) {
+				MainFrame.this.currOperation = new LaplaceMask();
+				MainFrame.this.hideSliders();
+				displayTextFields(true);
+				value2.setVisible(true);
+			}
+		});
+		masks.add(lmask);
+		JMenuItem logmask = new JMenuItem("Mask LOG");
+		logmask.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent event) {
+				MainFrame.this.currOperation = new LogMask();
+				MainFrame.this.hideSliders();
+				displayTextFields(true);
+				value1.setVisible(true);
+				value2.setVisible(true);
+			}
+		});
+		masks.add(logmask);
 		
 		JMenuItem anisotropicDiffusion = new JMenuItem("Anisotropic Diffusion");
 		anisotropicDiffusion.addActionListener(new ActionListener() {
@@ -647,7 +669,7 @@ public class MainFrame extends JFrame {
 				MainFrame.this.hideSliders();
 				displayTextFields(false);
 				rectangle.setVisible(false);
-				maskSize.setVisible(false);
+				maskSize.setVisible(true);
 				value1.setVisible(true);
 				value2.setVisible(true);
 				EdgeDetectorDialog edgeDetectorDialog = new EdgeDetectorDialog(leclercRadioButton, lorentzRadioButton);
