@@ -46,6 +46,9 @@ import sturla.atitp.frontend.imageops.SobelEdgeDetectorOperation;
 import sturla.atitp.frontend.imageops.binaryops.AddImageOperation;
 import sturla.atitp.frontend.imageops.binaryops.MultiplyImageOperation;
 import sturla.atitp.frontend.imageops.binaryops.SubtractImageOperation;
+import sturla.atitp.frontend.imageops.masks.FourMaskA;
+import sturla.atitp.frontend.imageops.masks.FourMaskC;
+import sturla.atitp.frontend.imageops.masks.FourMaskKirsh;
 import sturla.atitp.frontend.imageops.masks.GaussianFilterOperation;
 import sturla.atitp.frontend.imageops.masks.HighPassOperation;
 import sturla.atitp.frontend.imageops.masks.LaplaceMask;
@@ -613,6 +616,16 @@ public class MainFrame extends JFrame {
 			}
 		});
 		masks.add(maskA);
+		JMenuItem maskA4 = new JMenuItem("Mask A: 4 dirs");
+		maskA4.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent event) {
+				MainFrame.this.currOperation = new FourMaskA();
+				MainFrame.this.hideSliders();
+				displayTextFields(false);
+				rectangle.setVisible(false);
+			}
+		});
+		masks.add(maskA4);
 		JMenuItem maskKirsh = new JMenuItem("Mask Kirsh");
 		maskKirsh.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent event) {
@@ -622,6 +635,16 @@ public class MainFrame extends JFrame {
 			}
 		});
 		masks.add(maskKirsh);
+		JMenuItem maskKirsh4 = new JMenuItem("Mask Kirsh: 4 dirs");
+		maskKirsh4.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent event) {
+				MainFrame.this.currOperation = new FourMaskKirsh();
+				MainFrame.this.hideSliders();
+				displayTextFields(false);
+				rectangle.setVisible(false);
+			}
+		});
+		masks.add(maskKirsh4);
 		JMenuItem maskC = new JMenuItem("Mask C");
 		maskC.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent event) {
@@ -631,6 +654,16 @@ public class MainFrame extends JFrame {
 			}
 		});
 		masks.add(maskC);
+		JMenuItem maskC4 = new JMenuItem("Mask C: 4 dirs");
+		maskC4.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent event) {
+				MainFrame.this.currOperation = new FourMaskC();
+				MainFrame.this.hideSliders();
+				displayTextFields(false);
+				rectangle.setVisible(false);
+			}
+		});
+		masks.add(maskC4);
 		JMenuItem maskD = new JMenuItem("Mask D");
 		maskD.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent event) {
@@ -640,6 +673,18 @@ public class MainFrame extends JFrame {
 			}
 		});
 		masks.add(maskD);
+		
+		JMenuItem maskD4 = new JMenuItem("Mask D: 4 dirs");
+		maskD4.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent event) {
+				MainFrame.this.currOperation = new FourMaskC();
+				MainFrame.this.hideSliders();
+				displayTextFields(false);
+				rectangle.setVisible(false);
+			}
+		});
+		masks.add(maskD4);
+		
 		JMenuItem lmask = new JMenuItem("Mask Laplace");
 		lmask.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent event) {
@@ -661,7 +706,7 @@ public class MainFrame extends JFrame {
 			}
 		});
 		masks.add(logmask);
-		
+
 		JMenuItem anisotropicDiffusion = new JMenuItem("Anisotropic Diffusion");
 		anisotropicDiffusion.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent event) {
