@@ -1,4 +1,4 @@
-package sturla.atitp.frontend.imageops.binaryops;
+package sturla.atitp.frontend.imageops.arithmetic;
 
 import sturla.atitp.frontend.ImageLabelContainer;
 import sturla.atitp.frontend.imageops.ImageOperation;

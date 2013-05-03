@@ -8,12 +8,12 @@ import javax.swing.JMenuItem;
 
 import sturla.atitp.frontend.EdgeDetectorDialog;
 import sturla.atitp.frontend.MainFrame;
-import sturla.atitp.frontend.imageops.AnisotropicDiffusionOperation;
-import sturla.atitp.frontend.imageops.IsotropicDiffusionOperation;
+import sturla.atitp.frontend.imageops.extra.AnisotropicDiffusionOperation;
 import sturla.atitp.frontend.imageops.extra.ContrastOperation;
 import sturla.atitp.frontend.imageops.extra.DynamicRangeCompressionOperation;
 import sturla.atitp.frontend.imageops.extra.EqualizeImageOperation;
 import sturla.atitp.frontend.imageops.extra.HistogramOperation;
+import sturla.atitp.frontend.imageops.extra.IsotropicDiffusionOperation;
 
 public class ExtraMenu extends JMenu {
 

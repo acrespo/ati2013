@@ -7,11 +7,11 @@ import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 
 import sturla.atitp.frontend.MainFrame;
-import sturla.atitp.frontend.imageops.MultiplyScalarOperation;
-import sturla.atitp.frontend.imageops.NegativeImageOperation;
-import sturla.atitp.frontend.imageops.binaryops.AddImageOperation;
-import sturla.atitp.frontend.imageops.binaryops.MultiplyImageOperation;
-import sturla.atitp.frontend.imageops.binaryops.SubtractImageOperation;
+import sturla.atitp.frontend.imageops.arithmetic.AddImageOperation;
+import sturla.atitp.frontend.imageops.arithmetic.MultiplyImageOperation;
+import sturla.atitp.frontend.imageops.arithmetic.MultiplyScalarOperation;
+import sturla.atitp.frontend.imageops.arithmetic.NegativeImageOperation;
+import sturla.atitp.frontend.imageops.arithmetic.SubtractImageOperation;
 
 public class ArithmeticMenu extends JMenu {
 
