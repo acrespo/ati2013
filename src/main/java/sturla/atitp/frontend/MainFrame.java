@@ -11,11 +11,8 @@ import java.io.IOException;
 
 import javax.swing.JButton;
 import javax.swing.JComponent;
-import javax.swing.JFileChooser;
 import javax.swing.JFrame;
-import javax.swing.JMenu;
 import javax.swing.JMenuBar;
-import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JSlider;
@@ -29,46 +26,15 @@ import javax.swing.event.ChangeListener;
 import org.apache.sanselan.ImageReadException;
 
 import sturla.atitp.app.ImageLoader;
-import sturla.atitp.app.ImageSaver;
-import sturla.atitp.frontend.imageops.AnisotropicDiffusionOperation;
 import sturla.atitp.frontend.imageops.ImageOperation;
 import sturla.atitp.frontend.imageops.ImageOperationParameters;
-import sturla.atitp.frontend.imageops.IsotropicDiffusionOperation;
-import sturla.atitp.frontend.imageops.MultiplyScalarOperation;
-import sturla.atitp.frontend.imageops.NegativeImageOperation;
-import sturla.atitp.frontend.imageops.binaryops.AddImageOperation;
-import sturla.atitp.frontend.imageops.binaryops.MultiplyImageOperation;
-import sturla.atitp.frontend.imageops.binaryops.SubtractImageOperation;
-import sturla.atitp.frontend.imageops.edgeDetectors.PrewittEdgeDetectorOperation;
-import sturla.atitp.frontend.imageops.edgeDetectors.RobertsEdgeDetectorOperation;
-import sturla.atitp.frontend.imageops.edgeDetectors.SobelEdgeDetectorOperation;
-import sturla.atitp.frontend.imageops.extra.ContrastOperation;
-import sturla.atitp.frontend.imageops.extra.DynamicRangeCompressionOperation;
-import sturla.atitp.frontend.imageops.extra.EqualizeImageOperation;
-import sturla.atitp.frontend.imageops.extra.HistogramOperation;
-import sturla.atitp.frontend.imageops.masks.FourMaskA;
-import sturla.atitp.frontend.imageops.masks.FourMaskC;
-import sturla.atitp.frontend.imageops.masks.FourMaskKirsh;
-import sturla.atitp.frontend.imageops.masks.GaussianFilterOperation;
-import sturla.atitp.frontend.imageops.masks.HighPassOperation;
-import sturla.atitp.frontend.imageops.masks.LaplaceMask;
-import sturla.atitp.frontend.imageops.masks.LogMask;
-import sturla.atitp.frontend.imageops.masks.LowPassOperation;
-import sturla.atitp.frontend.imageops.masks.MaskA;
-import sturla.atitp.frontend.imageops.masks.MaskC;
-import sturla.atitp.frontend.imageops.masks.MaskD;
-import sturla.atitp.frontend.imageops.masks.MaskKirsh;
-import sturla.atitp.frontend.imageops.masks.MedianPassOperation;
-import sturla.atitp.frontend.imageops.noise.ExponentialNoiseOperation;
-import sturla.atitp.frontend.imageops.noise.RayleighNoiseOperation;
-import sturla.atitp.frontend.imageops.noise.SaltPepperOperation;
-import sturla.atitp.frontend.imageops.noise.WhiteNoiseOperation;
-import sturla.atitp.frontend.imageops.threshold.BinaryGlobalUmbralizationOperation;
-import sturla.atitp.frontend.imageops.threshold.BinaryOtsuUmbralizationOperation;
-import sturla.atitp.frontend.imageops.threshold.GlobalUmbralizationOperation;
-import sturla.atitp.frontend.imageops.threshold.OtsuUmbralizationOperation;
-import sturla.atitp.frontend.imageops.threshold.ThresholdBinaryOperation;
-import sturla.atitp.frontend.imageops.threshold.TreshHoldOperation;
+import sturla.atitp.frontend.menus.arithmeticMenu.ArithmeticMenu;
+import sturla.atitp.frontend.menus.edgeDetectorsMenu.EdgeDetectorsMenu;
+import sturla.atitp.frontend.menus.extraMenu.ExtraMenu;
+import sturla.atitp.frontend.menus.fileMenu.FileMenu;
+import sturla.atitp.frontend.menus.masksMenu.MasksMenu;
+import sturla.atitp.frontend.menus.noiseMenu.NoiseMenu;
+import sturla.atitp.frontend.menus.umbralizationMenu.UmbralizationMenu;
 import sturla.atitp.imageprocessing.edgeDetector.LeclercEdgeDetector;
 import sturla.atitp.imageprocessing.edgeDetector.LorentzEdgeDetector;
 import sturla.atitp.imageprocessing.synthesization.SynthesizationType;
@@ -78,39 +44,39 @@ public class MainFrame extends JFrame {
 	private static final long serialVersionUID = -4569949105927376584L;
 
 	private JPanel panel;
-	private ImageLabelContainer currentImageLabel;
+	public ImageLabelContainer currentImageLabel;
 	// used for binary operations
-	private ImageLabelContainer secondImageLabel;
-	private ImageLabelContainer resultImageLabel;
+	public ImageLabelContainer secondImageLabel;
+	public ImageLabelContainer resultImageLabel;
 
-	private ImageOperation currOperation;
+	public ImageOperation currOperation;
 
 	private JSlider parameterSlider1;
 	private JTextArea parameterField1;
-	private JSlider parameterSlider2;
-	private JTextArea parameterField2;
+	public JSlider parameterSlider2;
+	public JTextArea parameterField2;
 
 	private JTextField coordX1;
 	private JTextField coordY1;
 	private JTextField coordX2;
 	private JTextField coordY2;
-	private JTextField maskSize;
-	private JTextField value1;
-	private JTextField value2;
+	public JTextField maskSize;
+	public JTextField value1;
+	public JTextField value2;
 	
 	private JTextField rectWidth;
 	private JTextField rectHeight;
 
 	private JButton doItButton;
-	private DraggableComponent rectangle;
+	public DraggableComponent rectangle;
 
-	private JRadioButton leclercRadioButton;
-	private JRadioButton lorentzRadioButton;
+	public JRadioButton leclercRadioButton;
+	public JRadioButton lorentzRadioButton;
 
-	private JRadioButton absRadioButton;
-	private JRadioButton avgRadioButton;
-	private JRadioButton minRadioButton;
-	private JRadioButton maxRadioButton;
+	public JRadioButton absRadioButton;
+	public JRadioButton avgRadioButton;
+	public JRadioButton minRadioButton;
+	public JRadioButton maxRadioButton;
 
 	public MainFrame() {
 		initUI();
@@ -258,7 +224,7 @@ public class MainFrame extends JFrame {
 		coordY2.setText(String.valueOf(y2));
 	}
 
-	private void displayTextFields(boolean b) {
+	public void displayTextFields(boolean b) {
 		coordX1.setVisible(b);
 		coordY1.setVisible(b);
 		coordX2.setVisible(b);
@@ -349,510 +315,32 @@ public class MainFrame extends JFrame {
 	}
 
 	private void initMenu() {
-		JMenuBar menubar = new JMenuBar();
-		JMenu file = new JMenu("File");
-		JMenuItem exitItem = new JMenuItem("Exit");
-		exitItem.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent event) {
-				System.exit(0);
-			}
-		});
-		JMenuItem chooseFileItem = new JMenuItem("Choose Image");
-		chooseFileItem.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent event) {
-				JFileChooser fc = new JFileChooser();
-				fc.showOpenDialog(MainFrame.this);
-				setCurrentImage(fc.getSelectedFile());
-			}
-		});
-		JMenuItem chooseFile2Item = new JMenuItem("Choose Second Image");
-		chooseFile2Item.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent event) {
-				JFileChooser fc = new JFileChooser();
-				fc.showOpenDialog(MainFrame.this);
-				setSecondImage(fc.getSelectedFile());
-			}
-		});
-		JMenuItem save = new JMenuItem("Save result");
-		save.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent event) {
-				File file = new File("out.bmp");
-				try {
-				  ImageSaver.saveImage(file, resultImageLabel.getImage());
-				} catch (Exception e) {
-					System.out.println("Error");
-				}
-			}
-		});
-		JMenuItem swap = new JMenuItem("Result->Input");
-		swap.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent event) {
-				if (resultImageLabel.hasImage()) {
-					currentImageLabel.setImage(resultImageLabel.getImage());
-					resultImageLabel.removeImage();
-				}
-			}
-		});
-		file.add(chooseFileItem);
-		file.add(chooseFile2Item);
-		file.add(save);
-		file.add(swap);
-		file.add(exitItem);
+		JMenuBar menuBar = new JMenuBar();
 
-		JMenu noise = new JMenu("Noise");
-		JMenuItem rayleighNoiseItem = new JMenuItem("Rayleigh");
-		rayleighNoiseItem.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent event) {
-				MainFrame.this.currOperation = new RayleighNoiseOperation();
-				MainFrame.this.setFirstSlider(0, 200, 0);
-				MainFrame.this.parameterSlider2.setVisible(false);
-				MainFrame.this.parameterField2.setVisible(false);
-				displayTextFields(false);
-			}
-		});
-		noise.add(rayleighNoiseItem);
-		JMenuItem saltAndPepper = new JMenuItem("Salt And Pepper");
-		saltAndPepper.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent event) {
-				MainFrame.this.currOperation = new SaltPepperOperation();
-				MainFrame.this.setFirstSlider(0, 200, 0);
-				MainFrame.this.setSecondSlider(0, 200, 200);
-				displayTextFields(false);
-			}
-		});
-		noise.add(saltAndPepper);
-		JMenuItem whiteNoiseItem = new JMenuItem("WhiteNoise");
-		whiteNoiseItem.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent event) {
-				MainFrame.this.currOperation = new WhiteNoiseOperation();
-				MainFrame.this.setFirstSlider(0, 400, 0);
-				MainFrame.this.parameterSlider2.setVisible(false);
-				MainFrame.this.parameterField2.setVisible(false);
-				displayTextFields(false);
-			}
-		});
-		noise.add(whiteNoiseItem);
-		JMenuItem exponentialNoiseItem = new JMenuItem("Exponential Noise");
-		exponentialNoiseItem.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent event) {
-				MainFrame.this.currOperation = new ExponentialNoiseOperation();
-				MainFrame.this.setFirstSlider(0, 400, 0);
-				MainFrame.this.parameterSlider2.setVisible(false);
-				MainFrame.this.parameterField2.setVisible(false);
-				displayTextFields(false);
-			}
-		});
-		noise.add(exponentialNoiseItem);
-		JMenu arithmeticMenu = new JMenu("Arithmetic");
-		JMenuItem add = new JMenuItem("Add");
-		add.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent event) {
-				MainFrame.this.currOperation = new AddImageOperation();
-				MainFrame.this.hideSliders();
-				if (!secondImageLabel.hasImage() && resultImageLabel.hasImage()) {
-					secondImageLabel.setImage(resultImageLabel.getImage());
-				}
-				displayTextFields(false);
-			}
-		});
-		JMenuItem subtract = new JMenuItem("subtract");
-		subtract.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent event) {
-				MainFrame.this.currOperation = new SubtractImageOperation();
-				MainFrame.this.hideSliders();
-				if (!secondImageLabel.hasImage() && resultImageLabel.hasImage()) {
-					secondImageLabel.setImage(resultImageLabel.getImage());
-				}
-				displayTextFields(false);
-			}
-		});
-		JMenuItem multiply = new JMenuItem("multiply");
-		multiply.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent event) {
-				MainFrame.this.currOperation = new MultiplyImageOperation();
-				MainFrame.this.hideSliders();
-				if (!secondImageLabel.hasImage() && resultImageLabel.hasImage()) {
-					secondImageLabel.setImage(resultImageLabel.getImage());
-				}
-				displayTextFields(false);
-			}
-		});
-		JMenuItem multiplyScalar = new JMenuItem("multiply scalar");
-		multiplyScalar.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent event) {
-				MainFrame.this.currOperation = new MultiplyScalarOperation();
-				MainFrame.this.setFirstSlider(0, 400, 0);
-				MainFrame.this.parameterSlider2.setVisible(false);
-				MainFrame.this.parameterField2.setVisible(false);
-				displayTextFields(false);
-			}
-		});
-		JMenuItem multiplyBigScalar = new JMenuItem("multiply big scalar");
-		multiplyBigScalar.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent event) {
-				MainFrame.this.currOperation = new MultiplyScalarOperation();
-				MainFrame.this.setFirstSlider(0, 40000, 0);
-				MainFrame.this.parameterSlider2.setVisible(false);
-				MainFrame.this.parameterField2.setVisible(false);
-				displayTextFields(false);
-			}
-		});
-		JMenuItem treshold = new JMenuItem("threshold");
-		treshold.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent event) {
-				MainFrame.this.currOperation = new TreshHoldOperation();
-				MainFrame.this.setFirstSlider(0, 256 * 200, 0);
-				MainFrame.this.parameterSlider2.setVisible(false);
-				MainFrame.this.parameterField2.setVisible(false);
-				displayTextFields(false);
-			}
-		});
-		JMenuItem tresholdBinary = new JMenuItem("threshold binary");
-		tresholdBinary.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent event) {
-				MainFrame.this.currOperation = new ThresholdBinaryOperation();
-				MainFrame.this.setFirstSlider(0, 256 * 200, 0);
-				MainFrame.this.parameterSlider2.setVisible(false);
-				MainFrame.this.parameterField2.setVisible(false);
-				displayTextFields(false);
-			}
-		});
-		JMenuItem negative = new JMenuItem("Negative");
-		negative.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent event) {
-				MainFrame.this.currOperation = new NegativeImageOperation();
-				MainFrame.this.hideSliders();
-				displayTextFields(false);
-			}
-		});
-		arithmeticMenu.add(add);
-		arithmeticMenu.add(multiply);
-		arithmeticMenu.add(subtract);
-		arithmeticMenu.add(negative);
-		arithmeticMenu.add(multiplyScalar);
-		arithmeticMenu.add(multiplyBigScalar);
-		arithmeticMenu.add(treshold);
-		arithmeticMenu.add(tresholdBinary);
-		JMenu extra = new JMenu("Extra");
-		JMenuItem histogram = new JMenuItem("Histogram");
-		histogram.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent event) {
-				MainFrame.this.currOperation = new HistogramOperation();
-				MainFrame.this.hideSliders();
-				displayTextFields(false);
-			}
-		});
-		JMenuItem equalize = new JMenuItem("Equalize");
-		equalize.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent event) {
-				MainFrame.this.currOperation = new EqualizeImageOperation();
-				MainFrame.this.hideSliders();
-				displayTextFields(false);
-			}
-		});
-		JMenuItem dynamicCompr = new JMenuItem("Dynamic Compression");
-		dynamicCompr.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent event) {
-				MainFrame.this.currOperation = new DynamicRangeCompressionOperation();
-				MainFrame.this.hideSliders();
-				displayTextFields(false);
-			}
-		});
-		JMenu masks = new JMenu("Masks");
-		JMenuItem highPassMask = new JMenuItem("HighPass");
-		highPassMask.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent event) {
-				MainFrame.this.currOperation = new HighPassOperation();
-				MainFrame.this.hideSliders();
-				displayTextFields(true);
-			}
-		});
-		masks.add(highPassMask);
-		JMenuItem lowPassMask = new JMenuItem("LowPass");
-		lowPassMask.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent event) {
-				MainFrame.this.currOperation = new LowPassOperation();
-				MainFrame.this.hideSliders();
-				displayTextFields(true);
-			}
-		});
-		masks.add(lowPassMask);
-		JMenuItem medianPassMask = new JMenuItem("MedianPass");
-		medianPassMask.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent event) {
-				MainFrame.this.currOperation = new MedianPassOperation();
-				MainFrame.this.hideSliders();
-				displayTextFields(true);
-			}
-		});
-		masks.add(medianPassMask);
-		JMenuItem contrast = new JMenuItem("Increase contrast");
-		contrast.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent event) {
-				MainFrame.this.currOperation = new ContrastOperation();
-				MainFrame.this.hideSliders();
-				displayTextFields(true);
-				rectangle.setVisible(false);
-				maskSize.setVisible(false);
-			}
-		});
+		menuBar.add(new FileMenu(this));
+		menuBar.add(new NoiseMenu(this));		
+		menuBar.add(new ArithmeticMenu(this));
+		menuBar.add(new MasksMenu(this));
+		menuBar.add(new EdgeDetectorsMenu(this));
+		menuBar.add(new UmbralizationMenu(this));
+		menuBar.add(new ExtraMenu(this));
 		
-		JMenuItem gaussianFilterMask = new JMenuItem("Gaussian Filter");
-		gaussianFilterMask.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent event) {
-				MainFrame.this.currOperation = new GaussianFilterOperation();
-				MainFrame.this.hideSliders();
-				displayTextFields(true);
-				value2.setVisible(true);
-			}
-		});
-		masks.add(gaussianFilterMask);
-		JMenuItem maskA = new JMenuItem("Mask A");
-		maskA.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent event) {
-				MainFrame.this.currOperation = new MaskA();
-				MainFrame.this.hideSliders();
-				displayTextFields(true);
-			}
-		});
-		masks.add(maskA);
-		JMenuItem maskA4 = new JMenuItem("Mask A: 4 dirs");
-		maskA4.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent event) {
-				MainFrame.this.currOperation = new FourMaskA();
-				MainFrame.this.hideSliders();
-				displayTextFields(false);
-				rectangle.setVisible(false);
-			}
-		});
-		masks.add(maskA4);
-		JMenuItem maskKirsh = new JMenuItem("Mask Kirsh");
-		maskKirsh.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent event) {
-				MainFrame.this.currOperation = new MaskKirsh();
-				MainFrame.this.hideSliders();
-				displayTextFields(true);
-			}
-		});
-		masks.add(maskKirsh);
-		JMenuItem maskKirsh4 = new JMenuItem("Mask Kirsh: 4 dirs");
-		maskKirsh4.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent event) {
-				MainFrame.this.currOperation = new FourMaskKirsh();
-				MainFrame.this.hideSliders();
-				displayTextFields(false);
-				rectangle.setVisible(false);
-			}
-		});
-		masks.add(maskKirsh4);
-		JMenuItem maskC = new JMenuItem("Mask C");
-		maskC.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent event) {
-				MainFrame.this.currOperation = new MaskC();
-				MainFrame.this.hideSliders();
-				displayTextFields(true);
-			}
-		});
-		masks.add(maskC);
-		JMenuItem maskC4 = new JMenuItem("Mask C: 4 dirs");
-		maskC4.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent event) {
-				MainFrame.this.currOperation = new FourMaskC();
-				MainFrame.this.hideSliders();
-				displayTextFields(false);
-				rectangle.setVisible(false);
-			}
-		});
-		masks.add(maskC4);
-		JMenuItem maskD = new JMenuItem("Mask D");
-		maskD.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent event) {
-				MainFrame.this.currOperation = new MaskD();
-				MainFrame.this.hideSliders();
-				displayTextFields(true);
-			}
-		});
-		masks.add(maskD);
-		
-		JMenuItem maskD4 = new JMenuItem("Mask D: 4 dirs");
-		maskD4.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent event) {
-				MainFrame.this.currOperation = new FourMaskC();
-				MainFrame.this.hideSliders();
-				displayTextFields(false);
-				rectangle.setVisible(false);
-			}
-		});
-		masks.add(maskD4);
-		
-		JMenuItem lmask = new JMenuItem("Mask Laplace");
-		lmask.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent event) {
-				MainFrame.this.currOperation = new LaplaceMask();
-				MainFrame.this.hideSliders();
-				displayTextFields(true);
-				value2.setVisible(true);
-			}
-		});
-		masks.add(lmask);
-		JMenuItem logmask = new JMenuItem("Mask LOG");
-		logmask.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent event) {
-				MainFrame.this.currOperation = new LogMask();
-				MainFrame.this.hideSliders();
-				displayTextFields(true);
-				value1.setVisible(true);
-				value2.setVisible(true);
-			}
-		});
-		masks.add(logmask);
-
-		JMenuItem anisotropicDiffusion = new JMenuItem("Anisotropic Diffusion");
-		anisotropicDiffusion.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent event) {
-				MainFrame.this.currOperation = new AnisotropicDiffusionOperation();
-				MainFrame.this.hideSliders();
-				displayTextFields(false);
-				rectangle.setVisible(false);
-				maskSize.setVisible(true);
-				value1.setVisible(true);
-				value2.setVisible(true);
-				EdgeDetectorDialog edgeDetectorDialog = new EdgeDetectorDialog(leclercRadioButton, lorentzRadioButton);
-				edgeDetectorDialog.setVisible(true);
-			}
-		});
-		
-		JMenuItem isotropicDiffusion = new JMenuItem("Isotropic Diffusion");
-		isotropicDiffusion.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent event) {
-				MainFrame.this.currOperation = new IsotropicDiffusionOperation();
-				MainFrame.this.hideSliders();
-				displayTextFields(false);
-				rectangle.setVisible(false);
-				value1.setVisible(true);
-			}
-		});
-		
-		
-		JMenu edgeDetectors = new JMenu("Edge Detectors");
-		
-		JMenuItem robertsEdgeDetector = new JMenuItem("Roberts Edge Detector");
-		robertsEdgeDetector.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent event) {
-				MainFrame.this.currOperation = new RobertsEdgeDetectorOperation();
-				MainFrame.this.hideSliders();
-				displayTextFields(false);
-				rectangle.setVisible(false);
-				maskSize.setVisible(true);
-				SynthetizationDialog synthetizationDialog = new SynthetizationDialog(maxRadioButton, minRadioButton, avgRadioButton, absRadioButton);
-				synthetizationDialog.setVisible(true);
-			}
-		});
-		
-		JMenuItem prewittEdgeDetector = new JMenuItem("Prewitt Edge Detector");
-		prewittEdgeDetector.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent event) {
-				MainFrame.this.currOperation = new PrewittEdgeDetectorOperation();
-				MainFrame.this.hideSliders();
-				displayTextFields(false);
-				rectangle.setVisible(false);
-				maskSize.setVisible(true);
-				SynthetizationDialog synthetizationDialog = new SynthetizationDialog(maxRadioButton, minRadioButton, avgRadioButton, absRadioButton);
-				synthetizationDialog.setVisible(true);
-			}
-		});
-		
-		JMenuItem sobelEdgeDetector = new JMenuItem("Sobel Edge Detector");
-		sobelEdgeDetector.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent event) {
-				MainFrame.this.currOperation = new SobelEdgeDetectorOperation();
-				MainFrame.this.hideSliders();
-				displayTextFields(false);
-				rectangle.setVisible(false);
-				maskSize.setVisible(true);
-				SynthetizationDialog synthetizationDialog = new SynthetizationDialog(maxRadioButton, minRadioButton, avgRadioButton, absRadioButton);
-				synthetizationDialog.setVisible(true);
-			}
-		});
-		
-		edgeDetectors.add(robertsEdgeDetector);
-		edgeDetectors.add(prewittEdgeDetector);
-		edgeDetectors.add(sobelEdgeDetector);
-				
-		JMenuItem globalUmbralization = new JMenuItem("Global Umbralization");
-		globalUmbralization.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent event) {
-				MainFrame.this.currOperation = new GlobalUmbralizationOperation();
-				MainFrame.this.hideSliders();
-				displayTextFields(false);
-				rectangle.setVisible(false);
-			}
-		});
-		
-		JMenuItem otsuUmbralization = new JMenuItem("Otsu Umbralization");
-		otsuUmbralization.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent event) {
-				MainFrame.this.currOperation = new OtsuUmbralizationOperation();
-				MainFrame.this.hideSliders();
-				displayTextFields(false);
-				rectangle.setVisible(false);
-			}
-		});
-		JMenuItem binaryGlobalUmbralization = new JMenuItem("Binary Global Umbralization");
-		binaryGlobalUmbralization.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent event) {
-				MainFrame.this.currOperation = new BinaryGlobalUmbralizationOperation();
-				MainFrame.this.hideSliders();
-				displayTextFields(false);
-				rectangle.setVisible(false);
-			}
-		});
-		
-		JMenuItem binaryOtsuUmbralization = new JMenuItem("Binary Otsu Umbralization");
-		binaryOtsuUmbralization.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent event) {
-				MainFrame.this.currOperation = new BinaryOtsuUmbralizationOperation();
-				MainFrame.this.hideSliders();
-				displayTextFields(false);
-				rectangle.setVisible(false);
-			}
-		});
-		
-		
-		
-		extra.add(histogram);
-		extra.add(equalize);
-		extra.add(dynamicCompr);
-		extra.add(contrast);
-		extra.add(isotropicDiffusion);
-		extra.add(anisotropicDiffusion);
-		extra.add(globalUmbralization);
-		extra.add(otsuUmbralization);
-		extra.add(binaryGlobalUmbralization);
-		extra.add(binaryOtsuUmbralization);
-		
-		menubar.add(file);
-		menubar.add(noise);
-		menubar.add(arithmeticMenu);
-		menubar.add(masks);
-		menubar.add(edgeDetectors);
-		menubar.add(extra);
 		currentImageLabel = new ImageLabelContainer(this, this.panel);
 		secondImageLabel = new ImageLabelContainer(this, this.panel);
 		resultImageLabel = new ImageLabelContainer(this, this.panel);
 
-		setJMenuBar(menubar);
+		setJMenuBar(menuBar);
 		panel.repaint();
 	}
 
-	private void hideSliders() {
+	public void hideSliders() {
 		parameterSlider2.setVisible(false);
 		parameterSlider1.setVisible(false);
 		parameterField1.setVisible(false);
 		parameterField2.setVisible(false);
 	}
 
-	private void setCurrentImage(File file) {
+	public void setCurrentImage(File file) {
 		try {
 			currentImageLabel.setImage(ImageLoader.loadImage(file));
 		} catch (IOException e) {
@@ -862,7 +350,7 @@ public class MainFrame extends JFrame {
 		}
 	}
 
-	private void setSecondImage(File file) {
+	public void setSecondImage(File file) {
 		try {
 			secondImageLabel.setImage(ImageLoader.loadImage(file));
 		} catch (IOException e) {
@@ -872,7 +360,7 @@ public class MainFrame extends JFrame {
 		}
 	}
 
-	private void setFirstSlider(int minValue, int maxValue, int initValue) {
+	public void setFirstSlider(int minValue, int maxValue, int initValue) {
 		panel.remove(parameterSlider1);
 		secondImageLabel.removeImage();
 		parameterSlider1 = new JSlider(JSlider.HORIZONTAL, minValue, maxValue,
@@ -893,7 +381,7 @@ public class MainFrame extends JFrame {
 		this.panel.add(parameterSlider1);
 	}
 
-	private void setSecondSlider(int minValue, int maxValue, int initValue) {
+	public void setSecondSlider(int minValue, int maxValue, int initValue) {
 		parameterSlider2 = new JSlider(JSlider.HORIZONTAL, minValue, maxValue,
 				initValue);
 		parameterSlider2.setBounds(500, 550, 300, 50);
@@ -1005,4 +493,6 @@ public class MainFrame extends JFrame {
 		}
 
 	}
+	
+	
 }
