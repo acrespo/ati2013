@@ -1,7 +1,9 @@
-package sturla.atitp.frontend.imageops;
+package sturla.atitp.frontend.imageops.extra;
 
 import sturla.atitp.app.Utils;
 import sturla.atitp.frontend.ImageLabelContainer;
+import sturla.atitp.frontend.imageops.ImageOperation;
+import sturla.atitp.frontend.imageops.ImageOperationParameters;
 
 public class HistogramOperation extends ImageOperation {
 

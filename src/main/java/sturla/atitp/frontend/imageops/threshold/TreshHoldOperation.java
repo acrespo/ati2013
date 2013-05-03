@@ -1,19 +1,18 @@
-package sturla.atitp.frontend.imageops;
+package sturla.atitp.frontend.imageops.threshold;
 
 import sturla.atitp.frontend.ImageLabelContainer;
+import sturla.atitp.frontend.imageops.ImageOperation;
+import sturla.atitp.frontend.imageops.ImageOperationParameters;
 import sturla.atitp.imageprocessing.Image;
 
-public class RobertsEdgeDetectorOperation extends ImageOperation {
+public class TreshHoldOperation extends ImageOperation {
 
 	@Override
 	public void performOperation(ImageLabelContainer op1,
 			ImageLabelContainer op2, ImageLabelContainer result,
 			ImageOperationParameters params) {
-
 		Image img = op1.getImage().copy();
-		img.applyRobertsEdgeDetection(params.st);
+		img.threshold(params.value);
 		result.setImage(img);
-		
 	}
-
 }

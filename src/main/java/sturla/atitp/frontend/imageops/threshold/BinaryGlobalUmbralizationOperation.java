@@ -1,11 +1,11 @@
-package sturla.atitp.frontend.imageops.tresh;
+package sturla.atitp.frontend.imageops.threshold;
 
 import sturla.atitp.frontend.ImageLabelContainer;
 import sturla.atitp.frontend.imageops.ImageOperation;
 import sturla.atitp.frontend.imageops.ImageOperationParameters;
 import sturla.atitp.imageprocessing.Image;
 
-public class GlobalUmbralizationOperation extends ImageOperation {
+public class BinaryGlobalUmbralizationOperation extends ImageOperation {
 
 	@Override
 	public void performOperation(ImageLabelContainer op1,
@@ -13,7 +13,7 @@ public class GlobalUmbralizationOperation extends ImageOperation {
 			ImageOperationParameters params) {
 
 		Image img = op1.getImage().copy();
-		img.globalThreshold();
+		img.binaryGlobalThreshold();
 		result.setImage(img);
 	}
 
