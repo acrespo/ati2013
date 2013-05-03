@@ -530,6 +530,12 @@ public class RGBImage implements Image{
 		return ch;
 	}
 	
+	@Override
+	public void suppressNoMaxs() {
+		this.red.suppressNoMaxs();
+		this.green.suppressNoMaxs();
+		this.blue.suppressNoMaxs();
+	}
 	
 	@Override
 	public void applyCannyEdgeDetection() {

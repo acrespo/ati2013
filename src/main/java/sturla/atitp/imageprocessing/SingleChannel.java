@@ -757,13 +757,22 @@ public void zeroCross(double th){
 		SingleChannel channelToModify = clone();
 		channelToModify.applyMask(MaskFactory.buildGaussianMask(maskSize, sigma));
 	
+		channelToModify.suppressNoMaxs();
+		
+		double globalThresholdValue = channelToModify.getGlobalThresholdValue();
+		channelToModify.thresholdWithHysteresis(globalThresholdValue, globalThresholdValue + 30);
+		return channelToModify;
+	}
+	
+	public void suppressNoMaxs() {
+		
 		TwoMaskContainer mc = MaskFactory.buildSobelMasks();
-		SingleChannel G1 = channelToModify.clone();
+		SingleChannel G1 = clone();
 		G1.applyMask(mc.getDXMask());
-		SingleChannel G2 = channelToModify.clone();
+		SingleChannel G2 = clone();
 		G2.applyMask(mc.getDYMask());
 		
-		SingleChannel direction = new SingleChannel(width, height);
+		SingleChannel directionChannel = new SingleChannel(width, height);
 		for( int x = 0 ; x < width ; x++ ) {
 			for( int y = 0 ; y < height ; y++) {
 				double pxG1 = G1.getPixel(x, y);
@@ -773,19 +782,13 @@ public void zeroCross(double th){
 					anAngle = Math.atan(pxG1 / pxG2);
 				}
 				anAngle *= (180 / Math.PI);
-				direction.setPixel(x, y, anAngle);
+				directionChannel.setPixel(x, y, anAngle);
 			}
 		}
 		
 		G1.synthesize(SynthesizationType.ABS, G2);
-		channelToModify.channel = G1.channel;
-		channelToModify.suppressNoMaxs(direction);
-		double globalThresholdValue = channelToModify.getGlobalThresholdValue();
-		channelToModify.thresholdWithHysteresis(globalThresholdValue, globalThresholdValue + 30);
-		return channelToModify;
-	}
-	
-	private void suppressNoMaxs(SingleChannel directionChannel) {
+		this.channel = G1.channel;
+		
 		for( int x = 1 ; x < width - 1 ; x++ ) {
 			for( int y = 1 ; y < height - 1 ; y++) {
 				double pixel = getPixel(x, y);

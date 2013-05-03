@@ -116,6 +116,8 @@ public interface Image {
 	
 	public void binaryOtsuThreshold();
 
+	public void suppressNoMaxs();
+	
 	public void applyCannyEdgeDetection();
 	
 	public void thresholdWithHysteresis(double lowThreshold, double highThreshold);
