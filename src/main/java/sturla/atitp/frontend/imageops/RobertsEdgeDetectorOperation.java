@@ -11,7 +11,7 @@ public class RobertsEdgeDetectorOperation extends ImageOperation {
 			ImageOperationParameters params) {
 
 		Image img = op1.getImage().copy();
-		img.applyRobertsBorderDetection(params.st);
+		img.applyRobertsEdgeDetection(params.st);
 		result.setImage(img);
 		
 	}

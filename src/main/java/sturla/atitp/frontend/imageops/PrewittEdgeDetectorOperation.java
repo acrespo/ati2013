@@ -11,7 +11,7 @@ public class PrewittEdgeDetectorOperation extends ImageOperation {
 			ImageOperationParameters params) {
 
 		Image img = op1.getImage().copy();
-		img.applyPrewittBorderDetection(params.st);
+		img.applyPrewittEdgeDetection(params.st);
 		result.setImage(img);
 		
 	}

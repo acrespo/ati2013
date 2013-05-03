@@ -13,7 +13,7 @@ public class FourMaskKirsh extends ImageOperation {
 			ImageLabelContainer op2, ImageLabelContainer result,
 			ImageOperationParameters params) {
 		Image img = op1.getImage().copy();
-		img.applyMaskBKirshBorderDetection(SynthesizationType.MAX);
+		img.applyMaskBKirshEdgeDetection(SynthesizationType.MAX);
 		result.setImage(img);
 	}
 }

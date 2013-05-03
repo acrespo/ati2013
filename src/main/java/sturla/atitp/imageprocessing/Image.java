@@ -84,21 +84,21 @@ public interface Image {
 	
 	public void applyAnisotropicDiffusion(double lambda, int iterations, EdgeDetector bd);
 	
-	public void applyRobertsBorderDetection(SynthesizationType st);
+	public void applyRobertsEdgeDetection(SynthesizationType st);
 	
-	public void applyPrewittBorderDetection(SynthesizationType st);
+	public void applyPrewittEdgeDetection(SynthesizationType st);
 	
-	public void applySobelBorderDetection(SynthesizationType st);
+	public void applySobelEdgeDetection(SynthesizationType st);
 	
 	public void synthesize(SynthesizationType st, Image ... chnls);
 	
-	public void applyMaskABorderDetection(SynthesizationType st);
+	public void applyMaskAEdgeDetection(SynthesizationType st);
 	
-	public void applyMaskBKirshBorderDetection(SynthesizationType st);
+	public void applyMaskBKirshEdgeDetection(SynthesizationType st);
 	
-	public void applyMaskCBorderDetection(SynthesizationType st);
+	public void applyMaskCEdgeDetection(SynthesizationType st);
 	
-	public void applyMaskDBorderDetection(SynthesizationType st);
+	public void applyMaskDEdgeDetection(SynthesizationType st);
 	
 	public void applyLaplaceMask(int w, int h, int endW, int endH);
 	
@@ -116,11 +116,11 @@ public interface Image {
 	
 	public void binaryOtsuThreshold();
 
-	public void applyCannyBorderDetection();
+	public void applyCannyEdgeDetection();
 	
 	public void thresholdWithHysteresis(double lowThreshold, double highThreshold);
 	
-	public void applySusanMask(boolean detectBorders, boolean detectCorners);
+	public void applySusanMask(boolean detectEdges, boolean detectCorners);
 
 	public void houghTransformForLines();
 	

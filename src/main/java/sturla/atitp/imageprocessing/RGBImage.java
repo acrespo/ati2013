@@ -378,43 +378,43 @@ public class RGBImage implements Image{
 	}
 
 	@Override
-	public void applyPrewittBorderDetection(SynthesizationType st) {
+	public void applyPrewittEdgeDetection(SynthesizationType st) {
 		TwoMaskContainer mc = MaskFactory.buildPrewittMasks();
 		applyTwoMasksAndSynth(mc, st);
 	}
 
 	@Override
-	public void applyRobertsBorderDetection(SynthesizationType st) {
+	public void applyRobertsEdgeDetection(SynthesizationType st) {
 		TwoMaskContainer mc = MaskFactory.buildRobertsMasks();
 		applyTwoMasksAndSynth(mc, st);
 	}
 
 	@Override
-	public void applySobelBorderDetection(SynthesizationType st) {
+	public void applySobelEdgeDetection(SynthesizationType st) {
 		TwoMaskContainer mc = MaskFactory.buildSobelMasks();
 		applyTwoMasksAndSynth(mc, st);
 	}
 	
 	@Override
-	public void applyMaskABorderDetection(SynthesizationType st){
+	public void applyMaskAEdgeDetection(SynthesizationType st){
 		FourMaskContainer mc = MaskFactory.buildMaskA();
 		applyFourMasksAndSynth(mc, st);
 	}
 	
 	@Override
-	public void applyMaskBKirshBorderDetection(SynthesizationType st){
+	public void applyMaskBKirshEdgeDetection(SynthesizationType st){
 		FourMaskContainer mc = MaskFactory.buildMaskBKirsh();
 		applyFourMasksAndSynth(mc, st);
 	}
 	
 	@Override
-	public void applyMaskCBorderDetection(SynthesizationType st){
+	public void applyMaskCEdgeDetection(SynthesizationType st){
 		FourMaskContainer mc = MaskFactory.buildMaskC();
 		applyFourMasksAndSynth(mc, st);
 	}
 	
 	@Override
-	public void applyMaskDBorderDetection(SynthesizationType st){
+	public void applyMaskDEdgeDetection(SynthesizationType st){
 		FourMaskContainer mc = MaskFactory.buildMaskD();
 		applyFourMasksAndSynth(mc, st);
 	}
@@ -532,10 +532,10 @@ public class RGBImage implements Image{
 	
 	
 	@Override
-	public void applyCannyBorderDetection() {
-		this.red.applyCannyBorderDetection();
-		this.green.applyCannyBorderDetection();
-		this.blue.applyCannyBorderDetection();
+	public void applyCannyEdgeDetection() {
+		this.red.applyCannyEdgeDetection();
+		this.green.applyCannyEdgeDetection();
+		this.blue.applyCannyEdgeDetection();
 	}
 	
 	@Override
@@ -546,10 +546,10 @@ public class RGBImage implements Image{
 	}
 
 	@Override
-	public void applySusanMask(boolean detectBorders, boolean detectCorners) {
-		this.red.applySusanMask(detectBorders, detectCorners);
-		this.green.applySusanMask(detectBorders, detectCorners);
-		this.blue.applySusanMask(detectBorders, detectCorners);
+	public void applySusanMask(boolean detectEdges, boolean detectCorners) {
+		this.red.applySusanMask(detectEdges, detectCorners);
+		this.green.applySusanMask(detectEdges, detectCorners);
+		this.blue.applySusanMask(detectEdges, detectCorners);
 	}
 
 	@Override

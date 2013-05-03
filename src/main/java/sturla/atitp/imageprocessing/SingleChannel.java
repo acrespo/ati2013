@@ -666,11 +666,11 @@ public void zeroCross(double th){
 		this.channel = chnl.channel;
 	}
 	
-	public void applyCannyBorderDetection() {
+	public void applyCannyEdgeDetection() {
 		List<SingleChannel> channelList = new ArrayList<SingleChannel>();
 		for(int maskSize = 3; maskSize <= 5; maskSize += 2) {
 			for(double sigma = 0.05; sigma <= 0.25; sigma += 0.05) {
-				SingleChannel each = applyCannyBorderDetection(maskSize, sigma);
+				SingleChannel each = applyCannyEdgeDetection(maskSize, sigma);
 				channelList.add(each);
 			}
 		}
@@ -753,7 +753,7 @@ public void zeroCross(double th){
          return isMax;
 	 }
 	
-	 private SingleChannel applyCannyBorderDetection(int maskSize, double sigma) {
+	 private SingleChannel applyCannyEdgeDetection(int maskSize, double sigma) {
 		SingleChannel channelToModify = clone();
 		channelToModify.applyMask(MaskFactory.buildGaussianMask(maskSize, sigma));
 	
@@ -840,11 +840,11 @@ public void zeroCross(double th){
 			for( int y = 0 ; y < height; y++) {
 				double pixel = this.getPixel(x, y);
 				if(pixel >= lowThreshold && pixel <= highThreshold) {
-					boolean isBorderNeighbor1 = y > 0 && thresholdedChannelOutsider.getPixel(x, y - 1) == whiteColor;
-					boolean isBorderNeighbor2 = x > 0 && thresholdedChannelOutsider.getPixel(x - 1, y) == whiteColor;
-					boolean isBorderNeighbor3 = y < height - 1 && thresholdedChannelOutsider.getPixel(x, y + 1) == whiteColor;
-					boolean isBorderNeighbor4 = x < width - 1 && thresholdedChannelOutsider.getPixel(x + 1, y) == whiteColor;
-					if(isBorderNeighbor1 || isBorderNeighbor2 || isBorderNeighbor3 || isBorderNeighbor4) {
+					boolean isEdgeNeighbor1 = y > 0 && thresholdedChannelOutsider.getPixel(x, y - 1) == whiteColor;
+					boolean isEdgeNeighbor2 = x > 0 && thresholdedChannelOutsider.getPixel(x - 1, y) == whiteColor;
+					boolean isEdgeNeighbor3 = y < height - 1 && thresholdedChannelOutsider.getPixel(x, y + 1) == whiteColor;
+					boolean isEdgeNeighbor4 = x < width - 1 && thresholdedChannelOutsider.getPixel(x + 1, y) == whiteColor;
+					if(isEdgeNeighbor1 || isEdgeNeighbor2 || isEdgeNeighbor3 || isEdgeNeighbor4) {
 						thresholdedChannelInBetween.setPixel(x, y, whiteColor);
 					} else {
 						thresholdedChannelInBetween.setPixel(x, y, blackColor);
@@ -856,7 +856,7 @@ public void zeroCross(double th){
 		this.channel = thresholdedChannelInBetween.channel;
 	}
 	
-	public void applySusanMask(boolean detectBorders, boolean detectCorners) {
+	public void applySusanMask(boolean detectEdges, boolean detectCorners) {
 		double blackColor = MIN_CHANNEL_COLOR;
 		double whiteColor = MAX_CHANNEL_COLOR;
 		
@@ -866,7 +866,7 @@ public void zeroCross(double th){
 			for( int y = 0 ; y < height ; y++){
 				double newPixelValue = blackColor;
 				double s = applySusanPixelMask(x, y, mask);
-				if(detectBorders && isBorder(s) || detectCorners && isCorner(s)) {
+				if(detectEdges && isEdge(s) || detectCorners && isCorner(s)) {
 					newPixelValue = whiteColor;
 				}
 				newChannel.setPixel(x, y, newPixelValue);
@@ -875,7 +875,7 @@ public void zeroCross(double th){
 		this.channel = newChannel.channel;
 	}
 	
-	private boolean isBorder(double s) {
+	private boolean isEdge(double s) {
 		double lowLimit = 0.5 - (0.75 - 0.5) / 2;
 		double highLimit = 0.5 + (0.75 - 0.5) / 2;
 		

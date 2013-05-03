@@ -13,7 +13,7 @@ public class FourMaskA extends ImageOperation {
 			ImageLabelContainer op2, ImageLabelContainer result,
 			ImageOperationParameters params) {
 		Image img = op1.getImage().copy();
-		img.applyMaskABorderDetection(SynthesizationType.MAX);
+		img.applyMaskAEdgeDetection(SynthesizationType.MAX);
 		result.setImage(img);
 	}
 }

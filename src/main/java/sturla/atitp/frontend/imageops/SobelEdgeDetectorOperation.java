@@ -11,7 +11,7 @@ public class SobelEdgeDetectorOperation extends ImageOperation {
 			ImageOperationParameters params) {
 
 		Image img = op1.getImage().copy();
-		img.applySobelBorderDetection(params.st);
+		img.applySobelEdgeDetection(params.st);
 		result.setImage(img);
 		
 	}
