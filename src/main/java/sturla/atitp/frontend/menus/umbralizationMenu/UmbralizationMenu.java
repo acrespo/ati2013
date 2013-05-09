@@ -12,6 +12,7 @@ import sturla.atitp.frontend.imageops.threshold.BinaryOtsuUmbralizationOperation
 import sturla.atitp.frontend.imageops.threshold.GlobalUmbralizationOperation;
 import sturla.atitp.frontend.imageops.threshold.OtsuUmbralizationOperation;
 import sturla.atitp.frontend.imageops.threshold.ThresholdBinaryOperation;
+import sturla.atitp.frontend.imageops.threshold.ThresholdWithHysteresisOperation;
 import sturla.atitp.frontend.imageops.threshold.TreshHoldOperation;
 
 public class UmbralizationMenu extends JMenu {
@@ -88,12 +89,25 @@ public class UmbralizationMenu extends JMenu {
 			}
 		});
 		
+		JMenuItem hysteresisUmbralization = new JMenuItem("HysterUmbralization");
+		hysteresisUmbralization.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent event) {
+				mainFrame.currOperation = new ThresholdWithHysteresisOperation();
+				mainFrame.hideSliders();
+				mainFrame.displayTextFields(false);
+				mainFrame.rectangle.setVisible(false);
+				mainFrame.value1.setVisible(true);
+				mainFrame.value2.setVisible(true);
+			}
+		});
+		
 		this.add(treshold);
 		this.add(tresholdBinary);
 		this.add(globalUmbralization);
 		this.add(otsuUmbralization);
 		this.add(binaryGlobalUmbralization);
 		this.add(binaryOtsuUmbralization);
+		this.add(hysteresisUmbralization);
 	}
 
 }

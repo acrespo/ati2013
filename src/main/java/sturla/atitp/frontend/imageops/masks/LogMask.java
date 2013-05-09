@@ -16,6 +16,10 @@ public class LogMask extends ImageOperation {
 		img.applyMask(MaskFactory.buildLaplaceGaussianMask(params.maskSize, params.value),
 				params.x1, params.y1,
 				params.x2, params.y2);
+//		SAME AS
+//		img.applyLaplaceGaussianMask(params.maskSize, params.value,
+//				params.x1, params.y1,
+//				params.x2, params.y2);
 		img.applyZeroCrossing(params.value2);
 		result.setImage(img);
 	}

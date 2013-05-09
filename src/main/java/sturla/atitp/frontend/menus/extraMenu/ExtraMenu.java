@@ -13,6 +13,8 @@ import sturla.atitp.frontend.imageops.extra.ContrastOperation;
 import sturla.atitp.frontend.imageops.extra.DynamicRangeCompressionOperation;
 import sturla.atitp.frontend.imageops.extra.EqualizeImageOperation;
 import sturla.atitp.frontend.imageops.extra.HistogramOperation;
+import sturla.atitp.frontend.imageops.extra.HoughTransformForCirclesOperation;
+import sturla.atitp.frontend.imageops.extra.HoughTransformForLinesOperation;
 import sturla.atitp.frontend.imageops.extra.IsotropicDiffusionOperation;
 
 public class ExtraMenu extends JMenu {
@@ -91,13 +93,59 @@ public class ExtraMenu extends JMenu {
 				mainFrame.value1.setVisible(true);
 			}
 		});
-				
+			
+		JMenuItem supressNoMaxs = new JMenuItem("Suppress no maxs");
+		supressNoMaxs.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent event) {
+				mainFrame.currOperation = new IsotropicDiffusionOperation();
+				mainFrame.hideSliders();
+				mainFrame.displayTextFields(false);
+			}
+		});
+
+		JMenuItem houghForLines = new JMenuItem("Hough Transform for lines");
+		houghForLines.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent event) {
+				mainFrame.currOperation = new HoughTransformForLinesOperation();
+				mainFrame.hideSliders();
+				mainFrame.displayTextFields(false);
+			}
+		});
+		
+		JMenuItem houghForCircles = new JMenuItem("Hough Transform for lines");
+		houghForCircles.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent event) {
+				mainFrame.currOperation = new HoughTransformForCirclesOperation();
+				mainFrame.hideSliders();
+				mainFrame.displayTextFields(false);
+			}
+		});
+		
+//	    JMenuItem tracking = new JMenuItem("Tracking");
+//	    tracking.addActionListener(new ActionListener() {
+//		    	@Override
+//		    	public void actionPerformed(ActionEvent e) {
+//		    		if(mainFrame.getMask() == null) {	    		
+//			    		JDialog trackingDialog = new TrackingDialog(mainFrame);
+//			    		trackingDialog.setVisible(true);
+//		    		} else {
+//		    			mainFrame.loadMask(null);
+//		    			mainFrame.repaint();
+//		    		}
+//				}
+//			}); 
+		
 		this.add(histogram);
 		this.add(equalize);
 		this.add(dynamicCompr);
 		this.add(contrast);
 		this.add(isotropicDiffusion);
 		this.add(anisotropicDiffusion);
+		this.add(supressNoMaxs);
+		this.add(houghForLines);
+		this.add(houghForCircles);
+//		this.add(tracking);
+
 		
 	}
 	

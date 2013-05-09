@@ -668,11 +668,17 @@ public void zeroCross(double th){
 	
 	public void applyCannyEdgeDetection() {
 		List<SingleChannel> channelList = new ArrayList<SingleChannel>();
-		for(int maskSize = 3; maskSize <= 5; maskSize += 2) {
-			for(double sigma = 0.05; sigma <= 0.25; sigma += 0.05) {
-				SingleChannel each = applyCannyEdgeDetection(maskSize, sigma);
-				channelList.add(each);
-			}
+//		for(int maskSize = 3; maskSize <= 5; maskSize += 2) {
+//			for(double sigma = 0.05; sigma <= 0.25; sigma += 0.05) {
+//				SingleChannel each = applyCannyEdgeDetection(maskSize, sigma);
+//				channelList.add(each);
+//			}
+//		}
+		for(int maskSize = 3; maskSize <= 11; maskSize += 4) {
+			double sigma = 0.04 * maskSize;
+			SingleChannel each = applyCannyEdgeDetection(maskSize, sigma);
+			channelList.add(each);
+			
 		}
 		
 		SingleChannel initialChannel = channelList.get(0); 
@@ -756,11 +762,10 @@ public void zeroCross(double th){
 	 private SingleChannel applyCannyEdgeDetection(int maskSize, double sigma) {
 		SingleChannel channelToModify = clone();
 		channelToModify.applyMask(MaskFactory.buildGaussianMask(maskSize, sigma));
-	
 		channelToModify.suppressNoMaxs();
 		
-		double globalThresholdValue = channelToModify.getGlobalThresholdValue();
-		channelToModify.thresholdWithHysteresis(globalThresholdValue, globalThresholdValue + 30);
+//		double globalThresholdValue = channelToModify.getGlobalThresholdValue();
+		channelToModify.thresholdWithHysteresis(70, 120);
 		return channelToModify;
 	}
 	
@@ -782,6 +787,7 @@ public void zeroCross(double th){
 					anAngle = Math.atan(pxG1 / pxG2);
 				}
 				anAngle *= (180 / Math.PI);
+				anAngle = Math.abs(anAngle);
 				directionChannel.setPixel(x, y, anAngle);
 			}
 		}
@@ -797,24 +803,45 @@ public void zeroCross(double th){
 				}
 				
 				double direction = directionChannel.getPixel(x, y);
-				double neighbor1 = 0;
-				double neighbor2 = 0;
-				if(direction >= -90 && direction < -45) {
-					neighbor1 = getPixel(x, y - 1);
-					neighbor2 = getPixel(x, y + 1);
-				} else if(direction >= -45 && direction < 0) {
-					neighbor1 = getPixel(x + 1, y - 1);
-					neighbor2 = getPixel(x - 1, y + 1);
-				} else if(direction >= 0 && direction < 45) {
-					neighbor1 = getPixel(x + 1, y);
-					neighbor2 = getPixel(x - 1, y);
-				} else if(direction >= 45 && direction <= 90) {
-					neighbor1 = getPixel(x + 1, y + 1);
-					neighbor2 = getPixel(x - 1, y - 1);
+				int[] dir1 = null;
+				int[] dir2 = null;
+				int[][] directions = {
+						{0, -1},
+						{0, 1},
+						{1, -1},
+						{-1, 1},
+						{1, 0},
+						{-1, 0},
+						{1, 1},
+						{-1, -1}
+				}; 
+				if(direction >= 67.5 && direction < 112.5) {
+					dir1 = directions[0];
+					dir2 = directions[1];
+				} else if(direction >= 22.5 && direction < 67.5) {
+					dir1 = directions[2];
+					dir2 = directions[3];
+				} else if((direction >= 0 && direction < 22.5) || (direction >= 157.5 && direction < 180)) {
+					dir1 = directions[4];
+					dir2 = directions[5];
+				} else {
+					dir1 = directions[6];
+					dir2 = directions[7];
 				}
-				
-				if(neighbor1 > pixel || neighbor2 > pixel) {
-					setPixel(x, y, MIN_CHANNEL_COLOR);
+				List<Double> neighborPixels = new ArrayList<Double>();
+				for (int i = 1; i < 2; i ++) {
+					if (validPixel(x + dir1[0] * i, y + dir1[1] * i)) {
+						neighborPixels.add(getPixel(x + dir1[0] * i, y + dir1[1] * i));
+					}
+					if (validPixel(x + dir2[0] * i, y + dir2[1] * i)) {
+						neighborPixels.add(getPixel(x + dir2[0] * i, y + dir2[1] * i));
+					}
+				}
+				for (Double neighbor : neighborPixels) {
+					if (neighbor > getPixel(x, y)) {
+						setPixel(x, y, MIN_CHANNEL_COLOR);
+						break;
+					}
 				}
 			}
 		}
@@ -859,40 +886,7 @@ public void zeroCross(double th){
 		this.channel = thresholdedChannelInBetween.channel;
 	}
 	
-	public void applySusanMask(boolean detectEdges, boolean detectCorners) {
-		double blackColor = MIN_CHANNEL_COLOR;
-		double whiteColor = MAX_CHANNEL_COLOR;
-		
-		Mask mask = MaskFactory.buildSusanMask();
-		SingleChannel newChannel = new SingleChannel(this.width, this.height);
-		for( int x = 0 ; x < width ; x++ ){
-			for( int y = 0 ; y < height ; y++){
-				double newPixelValue = blackColor;
-				double s = applySusanPixelMask(x, y, mask);
-				if(detectEdges && isEdge(s) || detectCorners && isCorner(s)) {
-					newPixelValue = whiteColor;
-				}
-				newChannel.setPixel(x, y, newPixelValue);
-			}
-		}
-		this.channel = newChannel.channel;
-	}
-	
-	private boolean isEdge(double s) {
-		double lowLimit = 0.5 - (0.75 - 0.5) / 2;
-		double highLimit = 0.5 + (0.75 - 0.5) / 2;
-		
-		return s > lowLimit && s <= highLimit;
-	}
-	
-	private boolean isCorner(double s) {
-		double lowLimit = 0.75 - (0.75 - 0.5) / 2;
-		double highLimit = 0.75 + (0.75 - 0.5) / 2;
-		
-		return s > lowLimit && s <= highLimit;
-	}
-	
-	private double applySusanPixelMask(int x, int y, Mask mask) {
+	public double applySusanPixelMask(int x, int y, Mask mask) {
 		boolean ignoreByX = x < mask.getWidth() / 2 || x > this.getWidth() - mask.getWidth() / 2;
 		boolean ignoreByY = y < mask.getHeight() / 2 || y > this.getHeight() - mask.getHeight() / 2;
 		if(ignoreByX || ignoreByY) {

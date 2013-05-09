@@ -8,6 +8,7 @@ import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 
 import javax.swing.JButton;
 import javax.swing.JComponent;
@@ -35,6 +36,7 @@ import sturla.atitp.frontend.menus.fileMenu.FileMenu;
 import sturla.atitp.frontend.menus.masksMenu.MasksMenu;
 import sturla.atitp.frontend.menus.noiseMenu.NoiseMenu;
 import sturla.atitp.frontend.menus.umbralizationMenu.UmbralizationMenu;
+import sturla.atitp.imageprocessing.Point;
 import sturla.atitp.imageprocessing.edgeDetector.LeclercEdgeDetector;
 import sturla.atitp.imageprocessing.edgeDetector.LorentzEdgeDetector;
 import sturla.atitp.imageprocessing.synthesization.SynthesizationType;
@@ -56,9 +58,9 @@ public class MainFrame extends JFrame {
 	public JSlider parameterSlider2;
 	public JTextArea parameterField2;
 
-	private JTextField coordX1;
+	public JTextField coordX1;
 	private JTextField coordY1;
-	private JTextField coordX2;
+	public JTextField coordX2;
 	private JTextField coordY2;
 	public JTextField maskSize;
 	public JTextField value1;
@@ -77,6 +79,8 @@ public class MainFrame extends JFrame {
 	public JRadioButton avgRadioButton;
 	public JRadioButton minRadioButton;
 	public JRadioButton maxRadioButton;
+
+	private List<Point> thetas;
 
 	public MainFrame() {
 		initUI();
@@ -492,6 +496,15 @@ public class MainFrame extends JFrame {
 			setBounds(myX, myY, x, y);
 		}
 
+	}
+
+	public void loadMask(List<Point> thetas) {
+		this.thetas = thetas;
+		
+	}
+
+	public List<Point> getMask() {
+		return thetas;
 	}
 	
 	

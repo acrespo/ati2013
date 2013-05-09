@@ -553,9 +553,48 @@ public class RGBImage implements Image{
 
 	@Override
 	public void applySusanMask(boolean detectEdges, boolean detectCorners) {
-		this.red.applySusanMask(detectEdges, detectCorners);
-		this.green.applySusanMask(detectEdges, detectCorners);
-		this.blue.applySusanMask(detectEdges, detectCorners);
+		Color edgeColor = Color.CYAN;
+		Color cornerColor = Color.MAGENTA;
+		SingleChannel newRed = red.clone();
+		SingleChannel newBlue = blue.clone();
+		SingleChannel newGreen = green.clone();
+		Mask mask = MaskFactory.buildSusanMask();
+		for( int x = 0 ; x < getWidth() ; x++ ){
+			for( int y = 0 ; y < getHeight() ; y++){
+				double r = red.applySusanPixelMask(x, y, mask);
+				double g = green.applySusanPixelMask(x, y, mask);
+				double b = blue.applySusanPixelMask(x, y, mask);
+				if(detectEdges && (isEdge(r) || isEdge(g) || isEdge(b))) {
+					newRed.setPixel(x, y, edgeColor.getRed());
+					newBlue.setPixel(x, y, edgeColor.getGreen());
+					newGreen.setPixel(x, y, edgeColor.getBlue());
+				}
+				if(detectCorners && (isCorner(r) || isCorner(g) || isCorner(b))) {
+					newRed.setPixel(x, y, cornerColor.getRed());
+					newGreen.setPixel(x, y, cornerColor.getGreen());
+					newBlue.setPixel(x, y, cornerColor.getBlue());
+				}
+			}
+		}
+		this.red = newRed;
+		this.blue = newBlue;
+		this.green = newGreen;
+	}
+	
+	private boolean isEdge(double s) {
+		double lowLimit = 0.375;
+		double highLimit = 0.625;
+		return s > lowLimit && s <= highLimit;
+	}
+	
+	private boolean isCorner(double s) {
+		double lowLimit = 0.72;
+		double highLimit = 0.77;
+		
+		double lowLimit2 = 0.22;
+		double highLimit2 = 0.28;
+		
+		return (s > lowLimit && s <= highLimit) || (s > lowLimit2 && s <= highLimit2);
 	}
 
 	@Override
