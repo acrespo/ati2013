@@ -28,6 +28,7 @@ public class MasksMenu extends JMenu {
 
 	public MasksMenu(MainFrame parent) {
 		super("Masks");
+		this.mainFrame = parent;
 		
 		JMenuItem highPassMask = new JMenuItem("HighPass");
 		highPassMask.addActionListener(new ActionListener() {

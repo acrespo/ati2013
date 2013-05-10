@@ -41,7 +41,7 @@
 					<archive>
 						<manifest>
 							<addClasspath>true</addClasspath>
-							<mainClass>frontend.MainFrame</mainClass>
+							<mainClass>sturla.atitp.frontend.MainFrame</mainClass>
 						</manifest>
 					</archive>
 				</configuration>
