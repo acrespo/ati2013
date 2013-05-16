@@ -12,7 +12,7 @@ public class HoughTransformForLinesOperation extends ImageOperation {
 			ImageLabelContainer op2, ImageLabelContainer result,
 			ImageOperationParameters params) {
 		Image img = op1.getImage().copy();
-		img.houghTransformForLines();
+		img.houghTransformForLines(params.maskSize);
 		result.setImage(img);
 		
 	}

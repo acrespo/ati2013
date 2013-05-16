@@ -36,7 +36,8 @@ public class FileMenu extends JMenu {
 			public void actionPerformed(ActionEvent event) {
 				JFileChooser fc = new JFileChooser();
 				fc.showOpenDialog(FileMenu.this);
-				mainFrame.setCurrentImage(fc.getSelectedFile());
+				mainFrame.lastImageFile = fc.getSelectedFile();
+				mainFrame.setCurrentImage(mainFrame.lastImageFile);
 			}
 		});
 		JMenuItem chooseFile2Item = new JMenuItem("Choose Second Image");

@@ -27,9 +27,28 @@ public class RGBImage implements Image{
 		this.format = format;
 		this.type = type;
 	}
+	
+	public RGBImage(int height, int width) {
+
+		this.red = new SingleChannel(width, height);
+		this.green = new SingleChannel(width, height);
+		this.blue = new SingleChannel(width, height);
+	}
 
 	public RGBImage(BufferedImage bi, ImageFormat format, ImageType type){
 		this(bi.getHeight(), bi.getWidth(), format, type);
+		for(int x = 0 ; x < bi.getWidth() ; x++){
+			for(int y = 0 ; y < bi.getHeight() ; y++ ){
+				Color c = new Color(bi.getRGB(x, y));
+				red.setPixel(x, y, c.getRed());
+				green.setPixel(x, y, c.getGreen());
+				blue.setPixel(x, y, c.getBlue());
+			}
+		}
+	}
+	
+	public RGBImage(BufferedImage bi){
+		this(bi.getHeight(), bi.getWidth());
 		for(int x = 0 ; x < bi.getWidth() ; x++){
 			for(int y = 0 ; y < bi.getHeight() ; y++ ){
 				Color c = new Color(bi.getRGB(x, y));
@@ -523,8 +542,8 @@ public class RGBImage implements Image{
 		SingleChannel ch = new SingleChannel(getWidth(), getHeight());
 		for (int i = 0; i < getHeight(); i ++) {
 			for (int j = 0; j < getWidth(); j ++) {
-				double grey = (red.getPixel(i, j) + green.getPixel(i, j) + blue.getPixel(i, j)) / 3;
-				ch.setPixel(i, j, grey);
+				double grey = (red.getPixel(j, i) + green.getPixel(j, i) + blue.getPixel(j, i)) / 3;
+				ch.setPixel(j, i, grey);
 			}
 		}
 		return ch;
@@ -598,25 +617,32 @@ public class RGBImage implements Image{
 	}
 
 	@Override
-	public void houghTransformForLines() {
-		RGBImage backup = (RGBImage) copy();
-		
-		this.red.houghTransformForLines(0.75, 1, 1);
-		this.green = this.red;
-		this.blue = this.red;
-		
-		this.add(backup);
+	public void houghTransformForLines(int minLines) {
+		RGBImage calc = (RGBImage) copy();
+		calc.applyMaskAEdgeDetection(SynthesizationType.ABS);
+		calc.blackEdges();
+		calc.binaryOtsuThreshold();
+		calc.red.houghTransformForLines(0.75, 1, 1, this, minLines);
+	}
+	
+	private void blackEdges() {
+		for (int i = 0; i < getWidth(); i ++) {
+			setRGBPixel(i, 0, Color.BLACK.getRGB());
+			setRGBPixel(i, getHeight() - 1, Color.BLACK.getRGB());
+		}
+		for (int i = 0; i < getHeight(); i ++) {
+			setRGBPixel(0, i, Color.BLACK.getRGB());
+			setRGBPixel(getWidth() - 1, i, Color.BLACK.getRGB());
+		}
 	}
 
 	@Override
-	public void houghTransformForCircles() {
-		RGBImage backup = (RGBImage) copy();
-		
-		this.red.houghTransformForCircles(5, 1, 1, 2);
-		this.green = this.red;
-		this.blue = this.red;
-		
-		this.add(backup);
+	public void houghTransformForCircles(int minCircles) {
+		RGBImage calc = (RGBImage) copy();
+		calc.applyMaskAEdgeDetection(SynthesizationType.ABS);
+		calc.blackEdges();
+		calc.binaryOtsuThreshold();
+		calc.red.houghTransformForCircles(5, 3, 3, 3, this, minCircles);
 	}
 	
 	@Override
@@ -632,7 +658,7 @@ public class RGBImage implements Image{
 	}
 
 	@Override
-	public void tracking(List<Point> selection) {	
+	public List<Point> tracking(List<Point> selection) {	
 		TitaFunction tita = new TitaFunction(selection, this.red.getHeight(), this.red.getWidth());
 		int times = (int)(1.5 * Math.max(this.red.getHeight(), this.red.getWidth()));
 		boolean changes = true;
@@ -678,9 +704,14 @@ public class RGBImage implements Image{
 				}
 			}				
 			times--;
-		}		
-		selection.clear();
-		selection.addAll(tita.getIn());
+		}
+		Color markingColor = Color.MAGENTA;
+		for (Point p : tita.getlOut()) {
+			red.setPixel(p.x, p.y, markingColor.getRed());
+			blue.setPixel(p.x, p.y, markingColor.getBlue());
+			green.setPixel(p.x, p.y, markingColor.getGreen());
+		}
+		return tita.getIn();
 	}
 	
 	private double[] getAverage(List<Point> l){

@@ -16,6 +16,8 @@ import sturla.atitp.frontend.imageops.extra.HistogramOperation;
 import sturla.atitp.frontend.imageops.extra.HoughTransformForCirclesOperation;
 import sturla.atitp.frontend.imageops.extra.HoughTransformForLinesOperation;
 import sturla.atitp.frontend.imageops.extra.IsotropicDiffusionOperation;
+import sturla.atitp.frontend.imageops.extra.SequenceImageTrackingOperation;
+import sturla.atitp.frontend.imageops.extra.SingleImageTrackingOperation;
 
 public class ExtraMenu extends JMenu {
 
@@ -109,31 +111,41 @@ public class ExtraMenu extends JMenu {
 				mainFrame.currOperation = new HoughTransformForLinesOperation();
 				mainFrame.hideSliders();
 				mainFrame.displayTextFields(false);
+				mainFrame.maskSize.setVisible(true);
 			}
 		});
 		
-		JMenuItem houghForCircles = new JMenuItem("Hough Transform for lines");
+		JMenuItem houghForCircles = new JMenuItem("Hough Transform for circles");
 		houghForCircles.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent event) {
 				mainFrame.currOperation = new HoughTransformForCirclesOperation();
 				mainFrame.hideSliders();
 				mainFrame.displayTextFields(false);
+				mainFrame.maskSize.setVisible(true);
 			}
 		});
 		
-//	    JMenuItem tracking = new JMenuItem("Tracking");
-//	    tracking.addActionListener(new ActionListener() {
-//		    	@Override
-//		    	public void actionPerformed(ActionEvent e) {
-//		    		if(mainFrame.getMask() == null) {	    		
-//			    		JDialog trackingDialog = new TrackingDialog(mainFrame);
-//			    		trackingDialog.setVisible(true);
-//		    		} else {
-//		    			mainFrame.loadMask(null);
-//		    			mainFrame.repaint();
-//		    		}
-//				}
-//			}); 
+	    JMenuItem tracking = new JMenuItem("Single Image Tracking");
+	    tracking.addActionListener(new ActionListener() {
+		    	@Override
+		    	public void actionPerformed(ActionEvent e) {
+		    		mainFrame.hideSliders();
+		    		mainFrame.displayTextFields(true);
+		    		mainFrame.maskSize.setVisible(false);
+		    		mainFrame.onRectangleMoveDo = false;
+		    		mainFrame.currOperation = new SingleImageTrackingOperation();
+				}
+			});
+	    JMenuItem seqTracking = new JMenuItem("Sequence Image Tracking");
+	    seqTracking.addActionListener(new ActionListener() {
+		    	@Override
+		    	public void actionPerformed(ActionEvent e) {
+		    		mainFrame.hideSliders();
+		    		mainFrame.displayTextFields(true);
+		    		mainFrame.onRectangleMoveDo = false;
+		    		mainFrame.currOperation = new SequenceImageTrackingOperation();
+				}
+			}); 
 		
 		this.add(histogram);
 		this.add(equalize);
@@ -144,7 +156,8 @@ public class ExtraMenu extends JMenu {
 		this.add(supressNoMaxs);
 		this.add(houghForLines);
 		this.add(houghForCircles);
-//		this.add(tracking);
+		this.add(tracking);
+		this.add(seqTracking);
 
 		
 	}

@@ -25,6 +25,9 @@ public class TitaFunction {
 		List<Point> in = this.getIn();
 		for(Point c: in){
 			for(Point n: c.N4()){
+				if (outOfBounds(n)) {
+					continue;
+				}
 				if(values[n.y][n.x] == 3){
 					values[n.y][n.x] = -1;
 				}
@@ -33,6 +36,9 @@ public class TitaFunction {
 		List<Point> lIn = this.getlIn();
 		for(Point c: lIn){
 			for(Point n: c.N4()){
+				if (outOfBounds(n)) {
+					continue;
+				}
 				if(values[n.y][n.x] == 3){
 					values[n.y][n.x] = 1;
 				}

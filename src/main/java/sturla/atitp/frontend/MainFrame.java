@@ -50,6 +50,8 @@ public class MainFrame extends JFrame {
 	// used for binary operations
 	public ImageLabelContainer secondImageLabel;
 	public ImageLabelContainer resultImageLabel;
+	
+	public File lastImageFile;
 
 	public ImageOperation currOperation;
 
@@ -79,6 +81,8 @@ public class MainFrame extends JFrame {
 	public JRadioButton avgRadioButton;
 	public JRadioButton minRadioButton;
 	public JRadioButton maxRadioButton;
+	
+	public boolean onRectangleMoveDo = true;
 
 	private List<Point> thetas;
 
@@ -314,6 +318,9 @@ public class MainFrame extends JFrame {
 			params.st = SynthesizationType.ABS;
 		}
 		
+		params.imageFile = lastImageFile;
+		params.mainFrame  = this;
+		
 		
 		return params;
 	}
@@ -482,7 +489,9 @@ public class MainFrame extends JFrame {
 					int newY = e.getYOnScreen() - screenY + myY;
 					MainFrame.this.setCoords(newX, newY, newX + getWidth(), newY + getHeight());
 					setLocation(newX, newY);
-					MainFrame.this.doOperation();
+					if (onRectangleMoveDo) {
+						MainFrame.this.doOperation();						
+					}
 				}
 
 				@Override

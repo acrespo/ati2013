@@ -124,15 +124,15 @@ public interface Image {
 	
 	public void applySusanMask(boolean detectEdges, boolean detectCorners);
 
-	public void houghTransformForLines();
+	public void houghTransformForLines(int minLines);
 	
-	public void houghTransformForCircles();
+	public void houghTransformForCircles(int minCircles);
 
 	public void applyHarrisCornerDetector(int i, Double valueOf);
 
 	public boolean validPixel(int x, int y);
 
-	public void tracking(List<Point> selection);
+	public List<Point> tracking(List<Point> selection);
 	
 
 }

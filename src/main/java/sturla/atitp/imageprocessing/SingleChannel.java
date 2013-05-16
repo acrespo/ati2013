@@ -1,5 +1,6 @@
 package sturla.atitp.imageprocessing;
 
+import java.awt.Color;
 import java.awt.Point;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
@@ -917,9 +918,10 @@ public void zeroCross(double th){
 	 * 
 	 */
 	
-	public void houghTransformForLines(double eps, double roDiscretization, double thetaDiscretization) {
+	public void houghTransformForLines(double eps, double roDiscretization,
+			double thetaDiscretization, RGBImage image, int minLines) {
 //		long time = System.currentTimeMillis();
-		
+		Color markingColor = Color.MAGENTA;
 		double whiteColor = MAX_CHANNEL_COLOR;
 		double D = Math.max(width, height);
 		Range roRange = new Range(- Math.sqrt(2) * D, Math.sqrt(2) * D + roDiscretization);
@@ -974,15 +976,11 @@ public void zeroCross(double th){
 //		time = System.currentTimeMillis() - time;
 //		System.out.println("Sort list: " + time);
 //		time = System.currentTimeMillis();
-		
-		SingleChannel newChannel = new SingleChannel(width, height);
-		int maxHits = allBucketsAsList.get(0).hits;
-		if(maxHits >1)
-		for(BucketForLines b : allBucketsAsList) {
-			if(b.hits < maxHits) {
+		for (int i = 0; i <= minLines; i++) {
+			BucketForLines b = allBucketsAsList.get(i);
+			if (b.hits < 2) {
 				break;
 			}
-			
 			double roValue = roRange.getLowerBound() + b.ro * roDiscretization /*+ roDiscretization / 2*/;
 			double thetaValue = thetaRange.getLowerBound() + b.theta * thetaDiscretization/* + thetaDiscretization / 2*/;
 
@@ -991,18 +989,16 @@ public void zeroCross(double th){
 					double thetaTerm = x * Math.cos(thetaValue * Math.PI / 180) - y * Math.sin(thetaValue * Math.PI / 180);
 					double total = roValue - thetaTerm;
 					if(Math.abs(total) < eps && validPixel(x, y)) {
-						newChannel.setPixel(x, y, whiteColor);
+						image.setRGBPixel(x, y, markingColor.getRGB());
 					}
 				}
 			}
-			
 		}
 		
 //		time = System.currentTimeMillis() - time;
 //		System.out.println("Draw lines: " + time);
 //		time = System.currentTimeMillis();
 
-		this.channel = newChannel.channel;
 	}
 	
 	private static class BucketForLines implements Comparable<BucketForLines> {
@@ -1044,13 +1040,15 @@ public void zeroCross(double th){
 	 * 
 	 */
 	
-	public void houghTransformForCircles(double eps, double aDiscretization, double bDiscretization, double rDiscretization) {
+	public void houghTransformForCircles(double eps, double aDiscretization, double bDiscretization,
+			double rDiscretization, RGBImage image, int minCircles) {
 //		long time = System.currentTimeMillis();
 		
+		Color markingColor = Color.MAGENTA;
 		double whiteColor = MAX_CHANNEL_COLOR;
 		Range aRange = new Range(0, width);
 		Range bRange = new Range(0, height);
-		double maxRad = Math.min(width, height);
+		double maxRad = Math.min(width, height) / 2;
 		Range rRange = new Range(5, maxRad);
 		
 		int aSize = (int)(Math.abs(aRange.getUpperBound() - aRange.getLowerBound()) / aDiscretization);
@@ -1116,13 +1114,8 @@ public void zeroCross(double th){
 //		System.out.println("Sort list: " + time);
 //		time = System.currentTimeMillis();
 		
-		SingleChannel newChannel = new SingleChannel(width, height);
-		int maxHits = allBucketsAsList.get(0).hits;
-		if(maxHits >2)
-		for(BucketForCircles b : allBucketsAsList) {
-			if(b.hits < maxHits) {
-				break;
-			}
+		for (int i = 0 ; i <= minCircles; i ++) {
+			BucketForCircles b = allBucketsAsList.get(i);
 			double aValue = aRange.getLowerBound() + b.a * aDiscretization/* + aDiscretization / 2*/;
 			double bValue = bRange.getLowerBound() + b.b * bDiscretization /*+ bDiscretization / 2*/;
 			double rValue = rRange.getLowerBound() + b.r * rDiscretization/* + rDiscretization / 2*/;
@@ -1134,19 +1127,15 @@ public void zeroCross(double th){
 					double rTerm = Math.pow(rValue, 2);
 					double total = rTerm - aTerm - bTerm;
 					if(Math.abs(total) < 10 * eps && validPixel(x, y)) {
-						newChannel.setPixel(x, y, whiteColor);
+						image.setRGBPixel(x, y, markingColor.getRGB());
 					}
 				}
 			}
-//			break;
-			
 		}
 		
 //		time = System.currentTimeMillis() - time;
 //		System.out.println("Draw lines: " + time);
 //		time = System.currentTimeMillis();
-
-		this.channel = newChannel.channel;
 	}
 	
 	private static class BucketForCircles implements Comparable<BucketForCircles> {

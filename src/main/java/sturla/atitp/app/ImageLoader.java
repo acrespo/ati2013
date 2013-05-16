@@ -7,10 +7,9 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
-import org.apache.sanselan.ImageFormat;
-import org.apache.sanselan.ImageInfo;
+import javax.imageio.ImageIO;
+
 import org.apache.sanselan.ImageReadException;
-import org.apache.sanselan.Sanselan;
 
 import sturla.atitp.imageprocessing.Image;
 import sturla.atitp.imageprocessing.Image.ImageType;
@@ -21,31 +20,34 @@ public class ImageLoader {
 	
 	public static Image loadImage(File arch) throws ImageReadException, IOException{
 		
-		BufferedImage bi = Sanselan.getBufferedImage(arch);
-		ImageInfo info = Sanselan.getImageInfo(arch);
-		Image.ImageFormat format;
+		BufferedImage img = ImageIO.read(arch);
+		return new RGBImage(img);
 		
-		if( info.getFormat() == ImageFormat.IMAGE_FORMAT_BMP ){
-			format = Image.ImageFormat.BMP;
-		} else if( info.getFormat() == ImageFormat.IMAGE_FORMAT_PGM ){
-			format = Image.ImageFormat.PGM;
-		} else if( info.getFormat() == ImageFormat.IMAGE_FORMAT_PPM ){
-			format = Image.ImageFormat.PPM;
-		} else if( info.getFormat() == ImageFormat.IMAGE_FORMAT_UNKNOWN ){
-			//TODO: fix this
-			format = Image.ImageFormat.RAW;
-			throw new IllegalStateException("Unsupported image format");
-		} else {
-			throw new IllegalStateException("Unsupported image format");
-		}
-		
-		if(bi.getType() == BufferedImage.TYPE_INT_RGB){
-			return new RGBImage(bi, format, ImageType.RGB);
-		} else if(bi.getType() == BufferedImage.TYPE_BYTE_GRAY){			
-			return new RGBImage(bi, format, ImageType.GRAYSCALE);
-		} else {
-			throw new IllegalStateException("Image wasn't RGB nor Grayscale");
-		}
+//		BufferedImage bi = Sanselan.getBufferedImage(arch);
+//		ImageInfo info = Sanselan.getImageInfo(arch);
+//		Image.ImageFormat format;
+//		
+//		if( info.getFormat() == ImageFormat.IMAGE_FORMAT_BMP ){
+//			format = Image.ImageFormat.BMP;
+//		} else if( info.getFormat() == ImageFormat.IMAGE_FORMAT_PGM ){
+//			format = Image.ImageFormat.PGM;
+//		} else if( info.getFormat() == ImageFormat.IMAGE_FORMAT_PPM ){
+//			format = Image.ImageFormat.PPM;
+//		} else if( info.getFormat() == ImageFormat.IMAGE_FORMAT_UNKNOWN ){
+//			//TODO: fix this
+//			format = Image.ImageFormat.RAW;
+//			throw new IllegalStateException("Unsupported image format");
+//		} else {
+//			throw new IllegalStateException("Unsupported image format");
+//		}
+//		
+//		if(bi.getType() == BufferedImage.TYPE_INT_RGB){
+//			return new RGBImage(bi, format, ImageType.RGB);
+//		} else if(bi.getType() == BufferedImage.TYPE_BYTE_GRAY){			
+//			return new RGBImage(bi, format, ImageType.GRAYSCALE);
+//		} else {
+//			throw new IllegalStateException("Image wasn't RGB nor Grayscale");
+//		}
 		
 	}
 
