@@ -888,11 +888,6 @@ public void zeroCross(double th){
 	}
 	
 	public double applySusanPixelMask(int x, int y, Mask mask) {
-		boolean ignoreByX = x < mask.getWidth() / 2 || x > this.getWidth() - mask.getWidth() / 2;
-		boolean ignoreByY = y < mask.getHeight() / 2 || y > this.getHeight() - mask.getHeight() / 2;
-		if(ignoreByX || ignoreByY) {
-			return this.getPixel(x, y);
-		}
 		
 		final int maxThreshold = 27;
 		int amountOfPixelSameColor = 0;
@@ -909,7 +904,7 @@ public void zeroCross(double th){
 		}
 		
 		final int amountOfPixelsInMask = 37;
-		double s = 1 - amountOfPixelSameColor / (amountOfPixelsInMask * 1.0);
+		double s = 1 - (amountOfPixelSameColor / (amountOfPixelsInMask * 1.0));
 		return s;
 	}
 	

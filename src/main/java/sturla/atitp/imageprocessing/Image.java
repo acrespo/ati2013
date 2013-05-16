@@ -132,7 +132,10 @@ public interface Image {
 
 	public boolean validPixel(int x, int y);
 
-	public List<Point> tracking(List<Point> selection);
+	public List<Point> tracking(List<Point> selection, double[] averageIn, double[] averageOut);
+	
+	public double[] getAverageIn(List<Point> a);
+	public double[] getAverageOut(List<Point> b);
 	
 
 }

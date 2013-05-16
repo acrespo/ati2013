@@ -16,6 +16,10 @@ public class RGBImage implements Image{
 	private SingleChannel green;
 	private SingleChannel blue;
 
+	private double[] averageIn;
+	private double[] averageOut;
+	
+	
 	public RGBImage(int height, int width, ImageFormat format, ImageType type) {
 		if( format == null ){
 			throw new IllegalArgumentException("ImageFormat can't be null");
@@ -607,13 +611,13 @@ public class RGBImage implements Image{
 	}
 	
 	private boolean isCorner(double s) {
-		double lowLimit = 0.72;
-		double highLimit = 0.77;
+		double lowLimit = 0.60;
+		double highLimit = 0.90;
 		
-		double lowLimit2 = 0.22;
-		double highLimit2 = 0.28;
+		double lowLimit2 = 0.24;
+		double highLimit2 = 0.26;
 		
-		return (s > lowLimit && s <= highLimit) || (s > lowLimit2 && s <= highLimit2);
+		return (s > lowLimit && s <= highLimit)/* || (s > lowLimit2 && s <= highLimit2)*/;
 	}
 
 	@Override
@@ -657,15 +661,26 @@ public class RGBImage implements Image{
 		return this.red.validPixel(x, y);
 	}
 
+	
 	@Override
-	public List<Point> tracking(List<Point> selection) {	
+	public double[] getAverageIn(List<Point> in) {
+		return getAverage(in);
+	}
+	
+	@Override
+	public double[] getAverageOut(List<Point> in) {
+		TitaFunction tita = new TitaFunction(in, this.red.getHeight(), this.red.getWidth());
+		return getAverage(tita.getOut());
+	}
+	
+	
+	@Override
+	public List<Point> tracking(List<Point> selection, double[] averageIn, double[] averageOut) {	
 		TitaFunction tita = new TitaFunction(selection, this.red.getHeight(), this.red.getWidth());
 		int times = (int)(1.5 * Math.max(this.red.getHeight(), this.red.getWidth()));
 		boolean changes = true;
 		List<Point> in = tita.getIn();
 		List<Point> out = tita.getOut();
-		double[] averageIn = getAverage(in);
-		double[] averageOut = getAverage(out); 
 		
 		while((times > 0) && changes){
 			changes = false;			
@@ -706,7 +721,7 @@ public class RGBImage implements Image{
 			times--;
 		}
 		Color markingColor = Color.MAGENTA;
-		for (Point p : tita.getlOut()) {
+		for (Point p : tita.getIn()) {
 			red.setPixel(p.x, p.y, markingColor.getRed());
 			blue.setPixel(p.x, p.y, markingColor.getBlue());
 			green.setPixel(p.x, p.y, markingColor.getGreen());
@@ -721,19 +736,12 @@ public class RGBImage implements Image{
 		ret[2] = 0;
 		for(Point c: l){
 			ret[0]+=this.red.getPixel(c.x, c.y);
-		}
-		ret[0]=ret[0]/l.size();
-		
-		for(Point c: l){
 			ret[1]+=this.green.getPixel(c.x, c.y);
-		}
-		ret[1]=ret[1]/l.size();
-		
-		for(Point c: l){
 			ret[2]+=this.blue.getPixel(c.x, c.y);
 		}
+		ret[0]=ret[0]/l.size();
+		ret[1]=ret[1]/l.size();
 		ret[2]=ret[2]/l.size();
-		
 		return ret;
 	}
 
@@ -746,7 +754,10 @@ public class RGBImage implements Image{
 		
 		p1 = Math.sqrt(Math.pow((averageIn[0] - red), 2) + Math.pow((averageIn[1] - green), 2) + Math.pow((averageIn[2] - blue), 2));
 		p2 = Math.sqrt(Math.pow((averageOut[0] - red), 2) + Math.pow((averageOut[1] - green), 2) + Math.pow((averageOut[2] - blue), 2));
-		return p2 - p1;
+		double psigma1 = 1 - p1 / (Math.sqrt(3)*255);
+		double psigma2 = 1 - p2 / (Math.sqrt(3)*255);
+		
+		return Math.log(psigma1/psigma2);
 	}
 	
 }

@@ -5,6 +5,8 @@ import java.awt.event.ActionListener;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 
@@ -21,6 +23,8 @@ public class SequenceImageTrackingOperation extends ImageOperation {
 	
 	private Iterator<File> files;
 	private List<Point> currentSurface;
+	private double[] averageIn;
+	private double[] averageOut;
 	private ImageLabelContainer result;
 	Timer timer;
 	
@@ -38,7 +42,7 @@ public class SequenceImageTrackingOperation extends ImageOperation {
 	    		if (files.hasNext()) {
 	    			try{
 	    				Image img = ImageLoader.loadImage(files.next());
-	    				currentSurface = img.tracking(currentSurface);
+	    				currentSurface = img.tracking(currentSurface, averageIn, averageOut);
 	    				result.setImage(img);
 	    				timer.start();
 	    			} catch (Exception e) {
@@ -54,7 +58,18 @@ public class SequenceImageTrackingOperation extends ImageOperation {
 				currentSurface.add(new Point(i, j));
 			}
 		}
-		files = Arrays.asList(new File(params.imageFile.getParent()).listFiles()).iterator();
+		averageIn = op1.getImage().getAverageIn(currentSurface);
+		averageOut = op1.getImage().getAverageOut(currentSurface);
+		List<File> fileList = Arrays.asList(new File(params.imageFile.getParent()).listFiles());
+		Collections.sort(fileList, new Comparator<File>() {
+
+			@Override
+			public int compare(File f1, File f2) {
+				return f1.getAbsolutePath().compareTo(f2.getAbsolutePath());
+			}
+			
+		});
+		files = fileList.iterator();
 		timer = new Timer(params.maskSize, trackNewImageAction);
 		timer.start();
 	}

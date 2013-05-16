@@ -18,6 +18,7 @@ import sturla.atitp.frontend.imageops.extra.HoughTransformForLinesOperation;
 import sturla.atitp.frontend.imageops.extra.IsotropicDiffusionOperation;
 import sturla.atitp.frontend.imageops.extra.SequenceImageTrackingOperation;
 import sturla.atitp.frontend.imageops.extra.SingleImageTrackingOperation;
+import sturla.atitp.frontend.imageops.extra.SupressNoMaxsOperation;
 
 public class ExtraMenu extends JMenu {
 
@@ -99,7 +100,7 @@ public class ExtraMenu extends JMenu {
 		JMenuItem supressNoMaxs = new JMenuItem("Suppress no maxs");
 		supressNoMaxs.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent event) {
-				mainFrame.currOperation = new IsotropicDiffusionOperation();
+				mainFrame.currOperation = new SupressNoMaxsOperation();
 				mainFrame.hideSliders();
 				mainFrame.displayTextFields(false);
 			}
