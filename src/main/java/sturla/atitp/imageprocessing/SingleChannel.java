@@ -807,12 +807,12 @@ public void zeroCross(double th){
 				int[] dir1 = null;
 				int[] dir2 = null;
 				int[][] directions = {
-						{0, -1},
-						{0, 1},
-						{1, -1},
-						{-1, 1},
-						{1, 0},
 						{-1, 0},
+						{1, 0},
+						{-1, 1},
+						{1, -1},
+						{0, 1},
+						{0, -1},
 						{1, 1},
 						{-1, -1}
 				}; 
@@ -830,7 +830,7 @@ public void zeroCross(double th){
 					dir2 = directions[7];
 				}
 				List<Double> neighborPixels = new ArrayList<Double>();
-				for (int i = 1; i < 2; i ++) {
+				for (int i = 1; i < 3; i ++) {
 					if (validPixel(x + dir1[0] * i, y + dir1[1] * i)) {
 						neighborPixels.add(getPixel(x + dir1[0] * i, y + dir1[1] * i));
 					}
