@@ -1,5 +1,6 @@
 package sturla.atitp.imageprocessing;
 
+import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.util.List;
 
@@ -137,6 +138,8 @@ public interface Image {
 	public double[] getAvgOut();
 
 	public List<Point> tracking(List<Point> selection, double[] avgIn, double[] avgOut);
+	
+	public void paint(List<Point> points, Color color);
 	
 	
 

@@ -16,6 +16,7 @@ import sturla.atitp.frontend.imageops.extra.HistogramOperation;
 import sturla.atitp.frontend.imageops.extra.HoughTransformForCirclesOperation;
 import sturla.atitp.frontend.imageops.extra.HoughTransformForLinesOperation;
 import sturla.atitp.frontend.imageops.extra.IsotropicDiffusionOperation;
+import sturla.atitp.frontend.imageops.extra.SIFTMatching;
 import sturla.atitp.frontend.imageops.extra.SequenceImageTrackingOperation;
 import sturla.atitp.frontend.imageops.extra.SingleImageTrackingOperation;
 import sturla.atitp.frontend.imageops.extra.SupressNoMaxsOperation;
@@ -146,6 +147,14 @@ public class ExtraMenu extends JMenu {
 		    		mainFrame.onRectangleMoveDo = false;
 		    		mainFrame.currOperation = new SequenceImageTrackingOperation();
 				}
+			});
+	    JMenuItem sift = new JMenuItem("SIFT");
+	    sift.addActionListener(new ActionListener() {
+		    	@Override
+		    	public void actionPerformed(ActionEvent e) {
+		    		mainFrame.hideSliders();
+		    		mainFrame.currOperation = new SIFTMatching();
+				}
 			}); 
 		
 		this.add(histogram);
@@ -159,6 +168,7 @@ public class ExtraMenu extends JMenu {
 		this.add(houghForCircles);
 		this.add(tracking);
 		this.add(seqTracking);
+		this.add(sift);
 
 		
 	}

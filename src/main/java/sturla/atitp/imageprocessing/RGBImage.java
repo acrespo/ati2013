@@ -713,5 +713,17 @@ public class RGBImage implements Image{
 	public double[] getAvgOut() {
 		return avgOut;
 	}
+
+	@Override
+	public void paint(List<Point> points, Color color) {
+		for (Point p : points) {
+			if (p.x < 0 || p.x >= red.getWidth() || p.y < 0 || p.y >= getHeight()) {
+				System.out.printf("Invalid Pixel: %d, %d\n", p.x, p.y);
+			} else {
+				setRGBPixel(p.x, p.y, color.getRGB());
+			}
+		}
+		
+	}
 	
 }
