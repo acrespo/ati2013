@@ -2,6 +2,7 @@ package sturla.atitp.imageprocessing;
 
 import java.awt.Color;
 import java.awt.image.BufferedImage;
+import java.util.ArrayList;
 import java.util.List;
 
 import sturla.atitp.app.Utils;
@@ -15,9 +16,10 @@ public class RGBImage implements Image{
 	private SingleChannel red;
 	private SingleChannel green;
 	private SingleChannel blue;
+	
+	private double[] avgIn;
+	private double[] avgOut;
 
-	private double[] averageIn;
-	private double[] averageOut;
 	
 	
 	public RGBImage(int height, int width, ImageFormat format, ImageType type) {
@@ -663,101 +665,53 @@ public class RGBImage implements Image{
 
 	
 	@Override
-	public double[] getAverageIn(List<Point> in) {
-		return getAverage(in);
-	}
-	
-	@Override
-	public double[] getAverageOut(List<Point> in) {
-		TitaFunction tita = new TitaFunction(in, this.red.getHeight(), this.red.getWidth());
-		return getAverage(tita.getOut());
-	}
-	
-	
-	@Override
-	public List<Point> tracking(List<Point> selection, double[] averageIn, double[] averageOut) {	
-		TitaFunction tita = new TitaFunction(selection, this.red.getHeight(), this.red.getWidth());
-		int times = (int)(1.5 * Math.max(this.red.getHeight(), this.red.getWidth()));
-		boolean changes = true;
-		List<Point> in = tita.getIn();
-		List<Point> out = tita.getOut();
-		
-		while((times > 0) && changes){
-			changes = false;			
-			List<Point> lOut = tita.getlOut();
-			for(Point p: lOut){
-				if( Fd(p, averageIn, averageOut) > 0){
-					tita.setlIn(p);
-					for(Point y: p.N4()){
-						if(tita.isOut(y)){
-							tita.setlOut(y);
-						}
-					}
-					for(Point y: p.N4()){
-						if(tita.islIn(y)){
-							tita.setIn(y);
-						}
-					}
-					changes = true;
+	public List<Point> tracking(List<Point> selection, double[] avgIn, double[] avgOut) {	
+		TrackingArea trackingArea = new TrackingArea(selection, red, blue, green, avgIn, avgOut);
+		this.avgIn = trackingArea.getAverageIn();
+		this.avgOut = trackingArea.getAverageOut();
+		List<Point> affectedPoints = new ArrayList<Point>();
+		while(!trackingArea.stoppingCondition()){
+			for (Point p : trackingArea.limitOut()) {
+				if (trackingArea.f(p) > 0) {
+					affectedPoints.add(p);
 				}
 			}
-			List<Point> lIn = tita.getlIn();
-			for(Point p: lIn){
-				if( Fd(p, averageIn, averageOut) < 0){
-					tita.setlOut(p);
-					for(Point y: p.N4()){
-						if(tita.isIn(y)){
-							tita.setlIn(y);
-						}
-					}
-					for(Point y: p.N4()){
-						if(tita.islOut(y)){
-							tita.setOut(y);
-						}
-					}
-					changes = true;
+			for (Point p : affectedPoints) {
+				trackingArea.switchIn(p);
+			}
+			affectedPoints.clear();
+			trackingArea.shrinkLimitIn();
+			for (Point p : trackingArea.limitIn()) {
+				if (trackingArea.f(p) < 0) {
+					affectedPoints.add(p);
 				}
-			}				
-			times--;
+			}
+			for (Point p : affectedPoints) {
+				trackingArea.switchOut(p);
+			}
+			affectedPoints.clear();
+			trackingArea.shrinkLimitOut();
+			if (trackingArea.stoppingCondition()) {
+				trackingArea.smoothCurve();
+			}
 		}
 		Color markingColor = Color.MAGENTA;
-		for (Point p : tita.getIn()) {
+		for (Point p : trackingArea.getFinalArea()) {
 			red.setPixel(p.x, p.y, markingColor.getRed());
 			blue.setPixel(p.x, p.y, markingColor.getBlue());
 			green.setPixel(p.x, p.y, markingColor.getGreen());
 		}
-		return tita.getIn();
-	}
-	
-	private double[] getAverage(List<Point> l){
-		double[] ret = new double[3];
-		ret[0] = 0;
-		ret[1] = 0;
-		ret[2] = 0;
-		for(Point c: l){
-			ret[0]+=this.red.getPixel(c.x, c.y);
-			ret[1]+=this.green.getPixel(c.x, c.y);
-			ret[2]+=this.blue.getPixel(c.x, c.y);
-		}
-		ret[0]=ret[0]/l.size();
-		ret[1]=ret[1]/l.size();
-		ret[2]=ret[2]/l.size();
-		return ret;
+		return trackingArea.getFinalArea();
 	}
 
-	private double Fd(Point p, double[] averageIn, double[] averageOut) {	
-		double p1, p2;
-		double red, green, blue;
-		red = this.red.getPixel(p.x, p.y);
-		green = this.green.getPixel(p.x, p.y);
-		blue =  this.blue.getPixel(p.x, p.y);
-		
-		p1 = Math.sqrt(Math.pow((averageIn[0] - red), 2) + Math.pow((averageIn[1] - green), 2) + Math.pow((averageIn[2] - blue), 2));
-		p2 = Math.sqrt(Math.pow((averageOut[0] - red), 2) + Math.pow((averageOut[1] - green), 2) + Math.pow((averageOut[2] - blue), 2));
-		double psigma1 = 1 - p1 / (Math.sqrt(3)*255);
-		double psigma2 = 1 - p2 / (Math.sqrt(3)*255);
-		
-		return Math.log(psigma1/psigma2);
+	@Override
+	public double[] getAvgIn() {
+		return avgIn;
+	}
+
+	@Override
+	public double[] getAvgOut() {
+		return avgOut;
 	}
 	
 }

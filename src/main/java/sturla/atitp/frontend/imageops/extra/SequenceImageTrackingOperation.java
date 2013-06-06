@@ -23,12 +23,13 @@ public class SequenceImageTrackingOperation extends ImageOperation {
 	
 	private Iterator<File> files;
 	private List<Point> currentSurface;
-	private double[] averageIn;
-	private double[] averageOut;
 	private ImageLabelContainer result;
+	
+	private double[] avgIn;
+	private double[] avgOut;
 	Timer timer;
 	
-	
+	private boolean first = true;
 	
 	@Override
 	public void performOperation(ImageLabelContainer op1,
@@ -36,13 +37,23 @@ public class SequenceImageTrackingOperation extends ImageOperation {
 			ImageOperationParameters params) {
 		
 		this.result = pResult;
+		avgIn = new double[3];
+		avgOut = new double[3];
 		ActionListener trackNewImageAction = new ActionListener() {
 	    	@Override
 	    	public void actionPerformed(ActionEvent ae) {
 	    		if (files.hasNext()) {
 	    			try{
 	    				Image img = ImageLoader.loadImage(files.next());
-	    				currentSurface = img.tracking(currentSurface, averageIn, averageOut);
+	    				if (first) {
+	    					System.out.println("Calculating new avgin and avgout");
+	    					currentSurface = img.tracking(currentSurface, null, null);
+	    					avgIn = img.getAvgIn();
+	    					avgOut = img.getAvgOut();
+	    					first = false;
+	    				} else {
+	    					currentSurface = img.tracking(currentSurface, avgIn, avgOut);
+	    				}
 	    				result.setImage(img);
 	    				timer.start();
 	    			} catch (Exception e) {
@@ -58,8 +69,6 @@ public class SequenceImageTrackingOperation extends ImageOperation {
 				currentSurface.add(new Point(i, j));
 			}
 		}
-		averageIn = op1.getImage().getAverageIn(currentSurface);
-		averageOut = op1.getImage().getAverageOut(currentSurface);
 		List<File> fileList = Arrays.asList(new File(params.imageFile.getParent()).listFiles());
 		Collections.sort(fileList, new Comparator<File>() {
 

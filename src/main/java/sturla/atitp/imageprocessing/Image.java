@@ -131,11 +131,13 @@ public interface Image {
 	public void applyHarrisCornerDetector(int i, Double valueOf);
 
 	public boolean validPixel(int x, int y);
-
-	public List<Point> tracking(List<Point> selection, double[] averageIn, double[] averageOut);
 	
-	public double[] getAverageIn(List<Point> a);
-	public double[] getAverageOut(List<Point> b);
+	public double[] getAvgIn();
+	
+	public double[] getAvgOut();
+
+	public List<Point> tracking(List<Point> selection, double[] avgIn, double[] avgOut);
+	
 	
 
 }
