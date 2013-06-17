@@ -9,6 +9,7 @@ import javax.swing.JMenuItem;
 import sturla.atitp.frontend.MainFrame;
 import sturla.atitp.frontend.SynthetizationDialog;
 import sturla.atitp.frontend.imageops.edgeDetectors.CannyEdgeDetectorOperation;
+import sturla.atitp.frontend.imageops.edgeDetectors.HarrisCornerDetectorOperation;
 import sturla.atitp.frontend.imageops.edgeDetectors.PrewittEdgeDetectorOperation;
 import sturla.atitp.frontend.imageops.edgeDetectors.RobertsEdgeDetectorOperation;
 import sturla.atitp.frontend.imageops.edgeDetectors.SobelEdgeDetectorOperation;
@@ -88,10 +89,23 @@ public class EdgeDetectorsMenu extends JMenu {
 			}
 		});
 		
+		JMenuItem harrisCornerDetector = new JMenuItem("Harris Corner Detector");
+		harrisCornerDetector.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent event) {
+				mainFrame.currOperation = new HarrisCornerDetectorOperation();
+				mainFrame.hideSliders();
+				mainFrame.displayTextFields(false);
+				mainFrame.rectangle.setVisible(false);
+				mainFrame.maskSize.setVisible(true);
+				mainFrame.value1.setVisible(true);
+			}
+		});
+		
 		this.add(robertsEdgeDetector);
 		this.add(prewittEdgeDetector);
 		this.add(sobelEdgeDetector);
 		this.add(cannyEdgeDetector);
 		this.add(susanEdgeDetector);
+		this.add(harrisCornerDetector);
 	}
 }

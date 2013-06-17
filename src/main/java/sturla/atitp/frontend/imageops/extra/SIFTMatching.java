@@ -19,11 +19,12 @@ public class SIFTMatching extends ImageOperation {
 			ImageLabelContainer op2, ImageLabelContainer result,
 			ImageOperationParameters params) {
 		try {
-			BufferedReader buffReader = new BufferedReader(new FileReader("/home/acrespo/matching.txt"));
+			BufferedReader buffReader = new BufferedReader(new FileReader("/home/acrespo/matching_saint-michel.txt"));
 			String line;
 			int height = op1.getHeight();
 			int width = op1.getWidth();
 			int startX2 = op1.getWidth() + 100;
+			int counter = 0;
 			while ( (line = buffReader.readLine()) != null) {
 				line = line.trim();
 				String[] readVals = line.split(" ");
@@ -39,7 +40,18 @@ public class SIFTMatching extends ImageOperation {
 				int y1 = (int)(double)Double.valueOf(vals[1]);
 				int x2 = (int)(double)Double.valueOf(vals[4]);
 				int y2 = (int)(double)Double.valueOf(vals[5]);
-				params.mainFrame.getGraphics().drawLine(x1 , height - y1, x2 + startX2, height - y2);
+				params.mainFrame.getGraphics().setColor(Color.CYAN);
+				params.mainFrame.getGraphics().drawLine(y1, x1, y2 + startX2, x2);
+				params.mainFrame.getGraphics().draw3DRect(300, 0, 50, 50, true);
+				System.out.println(x1);
+				System.out.println(y1);
+				System.out.println(x2);
+				System.out.println(y2);
+				counter++;
+				if (counter > 15) {
+					return;
+				} 
+				
 			}
 			
 			
