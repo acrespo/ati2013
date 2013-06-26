@@ -652,10 +652,11 @@ public class RGBImage implements Image{
 	}
 	
 	@Override
-	public void applyHarrisCornerDetector(int size, Double sigma) {
-		this.red.applyHarrisCornerDetector(size, sigma);
-		this.green.applyHarrisCornerDetector(size, sigma);
-		this.blue.applyHarrisCornerDetector(size, sigma);		
+	public void applyHarrisCornerDetector(int masksize, double sigma, double r, double k) {
+		List<java.awt.Point> points = red.applyHarrisCornerDetector(masksize, sigma, r, k);
+		for (java.awt.Point point : points) {
+			this.setRGBPixel(point.x, point.y, Color.MAGENTA.getRGB());
+		}
 	}
 
 	@Override

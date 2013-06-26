@@ -13,7 +13,8 @@ public class HarrisCornerDetectorOperation extends ImageOperation {
 			ImageOperationParameters params) {
 		
 		Image img = op1.getImage().copy();
-		img.applyHarrisCornerDetector(params.maskSize, params.value);
+		img.applyHarrisCornerDetector(params.maskSize, params.value, params.x1, 
+				params.value2);
 		result.setImage(img);
 		
 		

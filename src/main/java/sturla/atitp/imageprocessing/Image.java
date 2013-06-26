@@ -129,7 +129,7 @@ public interface Image {
 	
 	public void houghTransformForCircles(int minCircles);
 
-	public void applyHarrisCornerDetector(int i, Double valueOf);
+	public void applyHarrisCornerDetector(int masksize, double sigma, double r, double k);
 
 	public boolean validPixel(int x, int y);
 	

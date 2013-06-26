@@ -98,6 +98,8 @@ public class EdgeDetectorsMenu extends JMenu {
 				mainFrame.rectangle.setVisible(false);
 				mainFrame.maskSize.setVisible(true);
 				mainFrame.value1.setVisible(true);
+				mainFrame.value2.setVisible(true);
+				mainFrame.coordX1.setVisible(true);
 			}
 		});
 		
