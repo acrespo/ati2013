@@ -94,12 +94,39 @@ public class RGBImage implements Image{
 		}
 		throw new IllegalStateException();
 	}
+	
+	public void setInsidePixel(int x, int y, Channel channel, double color) {
+
+		if( !red.validPixel(x, y)){
+			return;
+		}
+
+		if( channel == Channel.RED ){
+			red.setPixel(x, y, color);
+			return;
+		}
+		if( channel == Channel.GREEN ){
+			green.setPixel(x, y, color);
+			return;
+		}
+		if( channel == Channel.BLUE ){
+			blue.setPixel(x, y, color);
+			return;
+		}
+		throw new IllegalStateException();
+	}
 
 	@Override
 	public void setRGBPixel(int x, int y, int rgb) {
 		this.setPixel(x, y, Channel.RED, Utils.getRedFromRGB(rgb));
 		this.setPixel(x, y, Channel.GREEN, Utils.getGreenFromRGB(rgb));
 		this.setPixel(x, y, Channel.BLUE, Utils.getBlueFromRGB(rgb));
+	}
+	
+	public void setInsideRGBPixel(int x, int y, int rgb) {
+		this.setInsidePixel(x, y, Channel.RED, Utils.getRedFromRGB(rgb));
+		this.setInsidePixel(x, y, Channel.GREEN, Utils.getGreenFromRGB(rgb));
+		this.setInsidePixel(x, y, Channel.BLUE, Utils.getBlueFromRGB(rgb));
 	}
 
 	@Override
@@ -655,7 +682,15 @@ public class RGBImage implements Image{
 	public void applyHarrisCornerDetector(int masksize, double sigma, double r, double k) {
 		List<java.awt.Point> points = red.applyHarrisCornerDetector(masksize, sigma, r, k);
 		for (java.awt.Point point : points) {
-			this.setRGBPixel(point.x, point.y, Color.MAGENTA.getRGB());
+			this.setInsideRGBPixel(point.x - 1, point.y, Color.MAGENTA.getRGB());
+			this.setInsideRGBPixel(point.x - 2, point.y, Color.MAGENTA.getRGB());
+			this.setInsideRGBPixel(point.x, point.y, Color.MAGENTA.getRGB());
+			this.setInsideRGBPixel(point.x + 1, point.y, Color.MAGENTA.getRGB());
+			this.setInsideRGBPixel(point.x + 2, point.y, Color.MAGENTA.getRGB());
+			this.setInsideRGBPixel(point.x, point.y + 2, Color.MAGENTA.getRGB());
+			this.setInsideRGBPixel(point.x, point.y + 1, Color.MAGENTA.getRGB());
+			this.setInsideRGBPixel(point.x, point.y - 1, Color.MAGENTA.getRGB());
+			this.setInsideRGBPixel(point.x, point.y - 2, Color.MAGENTA.getRGB());
 		}
 	}
 
