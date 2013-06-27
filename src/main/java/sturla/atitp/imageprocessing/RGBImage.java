@@ -611,26 +611,38 @@ public class RGBImage implements Image{
 		SingleChannel newBlue = blue.clone();
 		SingleChannel newGreen = green.clone();
 		Mask mask = MaskFactory.buildSusanMask();
+		List<Point> edges = new ArrayList<Point>();
+		List<Point> corners = new ArrayList<Point>();
 		for( int x = 0 ; x < getWidth() ; x++ ){
 			for( int y = 0 ; y < getHeight() ; y++){
 				double r = red.applySusanPixelMask(x, y, mask);
 				double g = green.applySusanPixelMask(x, y, mask);
 				double b = blue.applySusanPixelMask(x, y, mask);
 				if(detectEdges && (isEdge(r) || isEdge(g) || isEdge(b))) {
-					newRed.setPixel(x, y, edgeColor.getRed());
-					newBlue.setPixel(x, y, edgeColor.getGreen());
-					newGreen.setPixel(x, y, edgeColor.getBlue());
+					edges.add(new Point(x, y));
 				}
 				if(detectCorners && (isCorner(r) || isCorner(g) || isCorner(b))) {
-					newRed.setPixel(x, y, cornerColor.getRed());
-					newGreen.setPixel(x, y, cornerColor.getGreen());
-					newBlue.setPixel(x, y, cornerColor.getBlue());
+					corners.add(new Point(x, y));
 				}
 			}
 		}
 		this.red = newRed;
 		this.blue = newBlue;
 		this.green = newGreen;
+		for (Point point : edges) {
+			setRGBPixel(point.x, point.y, Color.CYAN.getRGB());
+		}
+		for (Point point : corners) {
+			setInsideRGBPixel(point.x, point.y, Color.MAGENTA.getRGB());
+			setInsideRGBPixel(point.x - 1, point.y, Color.MAGENTA.getRGB());
+			setInsideRGBPixel(point.x - 2, point.y, Color.MAGENTA.getRGB());
+			setInsideRGBPixel(point.x + 1, point.y, Color.MAGENTA.getRGB());
+			setInsideRGBPixel(point.x + 2, point.y, Color.MAGENTA.getRGB());
+			setInsideRGBPixel(point.x, point.y - 1, Color.MAGENTA.getRGB());
+			setInsideRGBPixel(point.x, point.y - 2, Color.MAGENTA.getRGB());
+			setInsideRGBPixel(point.x, point.y + 1, Color.MAGENTA.getRGB());
+			setInsideRGBPixel(point.x, point.y + 2, Color.MAGENTA.getRGB());
+		}
 	}
 	
 	private boolean isEdge(double s) {

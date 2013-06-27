@@ -9,6 +9,7 @@ import org.apache.sanselan.ImageWriteException;
 import org.apache.sanselan.Sanselan;
 
 import sturla.atitp.imageprocessing.Image;
+import sturla.atitp.imageprocessing.Image.ImageType;
 
 public class ImageSaver {
 	
@@ -22,8 +23,8 @@ public class ImageSaver {
 		
 		if(!extension.equals("raw")){
 			bi = new BufferedImage(image.getWidth(), image.getHeight(), 
-					Utils.toBufferedImageType(image.getType()));
-			format = Utils.toSanselanImageFormat(image.getImageFormat());
+					Utils.toBufferedImageType(ImageType.RGB));
+			format = Utils.toSanselanImageFormat(Image.ImageFormat.BMP);
 		} else {
 			throw new UnsupportedOperationException("Still not supporting saving raw");
 		}

@@ -154,6 +154,7 @@ public class ExtraMenu extends JMenu {
 		    	public void actionPerformed(ActionEvent e) {
 		    		mainFrame.hideSliders();
 		    		mainFrame.currOperation = new SIFTMatching();
+		    		mainFrame.coordX1.setVisible(true);
 				}
 			}); 
 		

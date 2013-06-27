@@ -705,12 +705,6 @@ class SingleChannel implements Cloneable {
 
 	public void applyCannyEdgeDetection() {
 		List<SingleChannel> channelList = new ArrayList<SingleChannel>();
-		// for(int maskSize = 3; maskSize <= 5; maskSize += 2) {
-		// for(double sigma = 0.05; sigma <= 0.25; sigma += 0.05) {
-		// SingleChannel each = applyCannyEdgeDetection(maskSize, sigma);
-		// channelList.add(each);
-		// }
-		// }
 		for (int maskSize = 3; maskSize <= 11; maskSize += 4) {
 			double sigma = 0.04 * maskSize;
 			SingleChannel each = applyCannyEdgeDetection(maskSize, sigma);
@@ -786,19 +780,6 @@ class SingleChannel implements Cloneable {
 			}
 		}
 
-		// Display corners over the image (cross)
-//		for (Corner p : corners) {
-//			for (int dx = -2; dx <= 2; dx++) {
-//				if (p.x + dx < 0 || p.x + dx >= width)
-//					continue;
-//				setInsidePixel(output, (int) p.x + dx, (int) p.y, canal, 255);
-//			}
-//			for (int dy = -2; dy <= 2; dy++) {
-//				if (p.y + dy < 0 || p.y + dy >= height)
-//					continue;
-//				setInsidePixel(output, (int) p.x, (int) p.y + dy, canal, 255);
-//			}
-//		}
 		List<Point> points = new ArrayList<Point>();
 		for (Corner corner : corners) {
 			points.add(new Point(corner.x, corner.y));

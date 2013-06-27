@@ -51,10 +51,11 @@ public class FileMenu extends JMenu {
 		JMenuItem save = new JMenuItem("Save result");
 		save.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent event) {
-				File file = new File("out.bmp");
+				File file = new File("/home/acrespo/out.bmp");
 				try {
 				  ImageSaver.saveImage(file, mainFrame.resultImageLabel.getImage());
 				} catch (Exception e) {
+					e.printStackTrace();
 					System.out.println("Error");
 				}
 			}
