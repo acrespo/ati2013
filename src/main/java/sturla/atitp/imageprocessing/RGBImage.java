@@ -754,13 +754,10 @@ public class RGBImage implements Image{
 		
 		
 		// Handling same color occlusion
-		List<Point> set = trackingArea.getFinalArea();
-		List<Point2D> set2 = new ArrayList<Point2D>();
-		for (Point p: set) {
-			set2.add(p.toPoint2D());
-		}
-		if (!set2.isEmpty()) {
-			Point2D centroid = Point2D.centroid(set2);
+		List<Point> list = trackingArea.getFinalArea();
+		List<Point2D> list2 = toPoint2D(list);
+		if (!list2.isEmpty()) {
+			Point2D centroid = Point2D.centroid(list2);
 			System.out.println(centroid);
 			System.out.println(centroid.getAsInt());
 			System.out.println(centroid.x() + "  -  " + centroid.y());
@@ -773,50 +770,86 @@ public class RGBImage implements Image{
 					trackingArea.setSameColorOcclusion(true);
 				}	
 			}
-			Point centroidPoint = set.get(set.indexOf(new Point((int) centroid.x(), (int) centroid.y())));
+			Point centroidPoint = list.get(list.indexOf(new Point((int) centroid.x(), (int) centroid.y())));
 			markingColor = Color.BLUE;
-			System.out.println("centroidPoint:" + centroidPoint);
 			red.setPixel(centroidPoint.x, centroidPoint.y, markingColor.getRed());
 			blue.setPixel(centroidPoint.x, centroidPoint.y, markingColor.getBlue());
 			green.setPixel(centroidPoint.x, centroidPoint.y, markingColor.getGreen());
 			trackingArea.setCentroid(centroid);
 
-//			trackingArea = reappearance(trackingArea);
-
+			if(trackingArea.hasSameColorOcclusion()) {
+				trackingArea = reappearance(trackingArea, lastArea);
+			}
 		}
 		return trackingArea;
 	}
 
-	private TrackingArea reappearance(TrackingArea trackingArea) {
+	private List<Point2D> toPoint2D(List<Point> list) {
+		List<Point2D> list2 = new ArrayList<Point2D>();
+		for (Point p: list) {
+			list2.add(p.toPoint2D());
+		}
+		return list2;
+	}
+
+	private TrackingArea reappearance(TrackingArea trackingArea, TrackingArea lastArea) {
 
 		HashSet<Point> set = new HashSet<Point>(trackingArea.getFinalArea());
 		while (!set.isEmpty()) {
 			Point startPoint = set.iterator().next();
-
-
-			Queue<Point> queue = new LinkedList<Point>();
-			List<Point> list = new LinkedList<Point>();
-			queue.add(startPoint);
-			Point point;
-			while (!queue.isEmpty()) {
-				point = queue.poll();
-				if (!point.visited) {
-					list.add(point);
-					point.visited = true;
-					set.remove(point);
-				}
+			System.out.println("a : " + set.size() );
+			List<Point> list1 = bfs(set, startPoint, trackingArea);
+			
+			if (!set.isEmpty()) {
+				System.out.println("Object Reappeared!");
+				trackingArea.setSameColorOcclusion(false);
+				//Object has reappeared
+				startPoint = set.iterator().next();
+				List<Point> list2 = bfs(set, startPoint, trackingArea);
 				
-				for (Point p: point.N4()) {
-					if (!p.visited) {
-						queue.add(p);
-					}
+				Point2D centroid1 = Point2D.centroid(toPoint2D(list1));
+				Point2D centroid2 = Point2D.centroid(toPoint2D(list2));
+				
+				double distance1 = Point2D.distance(centroid1, lastArea.getCentroid());
+				double distance2 = Point2D.distance(centroid2, lastArea.getCentroid());
+				
+				if (distance1 < distance2) {
+					//object 1 is our guy
+					trackingArea.removePoints(list2);
+					
+				} else {
+					//object 2 is our guy
+					trackingArea.removePoints(list1);
 				}
 			}
 		}
 		
 		return trackingArea;
 	}
-	
+
+	private List<Point> bfs(HashSet<Point> set, Point startPoint, TrackingArea trackingArea) {
+		Queue<Point> queue = new LinkedList<Point>();
+		List<Point> list = new LinkedList<Point>();
+		queue.add(startPoint);
+		Point point;
+		while (!queue.isEmpty()) {
+			System.out.println("Fuck!");
+			point = queue.poll();
+			if (!list.contains(point)) {
+				list.add(point);
+				set.remove(point);
+			}			
+
+			for (Point p: point.N4()) {
+				if (trackingArea.belongsToObject(p) && !list.contains(point)) {
+					System.out.println("Adding: " + p);
+					queue.add(p);
+				}
+			}
+		}
+		return list;
+	}
+
 	@Override
 	public void simpleOcclussionTracking(TrackingStats stats) {	
 		TrackingArea trackingArea = new TrackingArea(stats.getLastSelection(), red, blue, green, stats.getAvgIn(), stats.getAvgOut());

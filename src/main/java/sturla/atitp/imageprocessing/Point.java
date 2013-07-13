@@ -9,7 +9,6 @@ import math.geom2d.Point2D;
 public class Point extends java.awt.Point {
 
 	private static final long serialVersionUID = 1L;
-	public boolean visited = false;
 	
 	public Point(int x, int y) {
 		super(x, y);

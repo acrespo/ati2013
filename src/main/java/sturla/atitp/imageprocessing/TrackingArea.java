@@ -398,4 +398,17 @@ public class TrackingArea {
 		
 	}
 
+	public boolean belongsToObject(Point p) {
+		System.out.println(p + " - " + outOfBounds(p.x, p.y) + "- phi = " +  phi[p.x][p.y]);
+		return !outOfBounds(p.x, p.y) && phi[p.x][p.y] < 0;
+	}
+	
+	public void removePoints(List<Point> list) {
+		for (Point p: list) {
+			limitIn.remove(p);
+			phi[p.x][p.y] = 3;
+			limitOut.remove(p);			
+		}
+	}
+	
 }
