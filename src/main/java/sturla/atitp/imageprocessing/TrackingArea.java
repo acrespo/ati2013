@@ -7,6 +7,8 @@ import java.util.Set;
 
 class TrackingArea {
 	
+	private static final int EXPANDED_AREA_RADIUS = 50;
+	
 	private static int[][] DIRECTIONS = { {-1, 0}, {1, 0}, {0, -1}, {0, 1}};
 	
 	private static int GAUSS_MASK_SIZE = 5;
@@ -17,6 +19,8 @@ class TrackingArea {
 	
 	private double[] averageIn;
 	private double[] averageOut;
+	
+	private double[] center;
 	
 	private int height;
 	private int width;
@@ -295,6 +299,80 @@ class TrackingArea {
 	
 	public double[] getAverageOut() {
 		return averageOut;
+	}
+	
+	public List<Point> getExpandedArea(double[] lastCenter) {
+		List<Point> ret = new ArrayList<Point>();
+		int avgX = 0;
+		int avgY = 0;
+		center = new double[2];
+		int n = 0;
+		for (int w = 0; w < width; w ++) {
+			for (int h = 0; h < height; h ++) {
+				if (phi[w][h] < 0) {
+					n++;
+					avgX += w;
+					avgY += h;
+				}
+			}
+		}
+		if (n != 0) {
+			avgX /= n;
+			avgY /= n;
+			center[0] = avgX;
+			center[1] = avgY;			
+		} else {
+			center[0] = lastCenter[0];
+			center[1] = lastCenter[1];
+		}
+		
+		for (int w = - EXPANDED_AREA_RADIUS; w <= EXPANDED_AREA_RADIUS; w ++) {
+			for (int h = Math.abs(w) - EXPANDED_AREA_RADIUS ; h <=  EXPANDED_AREA_RADIUS - Math.abs(w); h ++) {
+				int currW = avgX + w;
+				int currH = avgY + h;
+				if (!outOfBounds(currW, currH)) {
+					ret.add(new Point(currW, currH));
+				}
+			}
+		}
+		
+		return ret;
+	}
+	
+	public double[] getCenter() {
+		return center;
+	}
+	
+	public List<Point> getExpandedAreaLimits() {
+		List<Point> ret = new ArrayList<Point>();
+		int avgX = 0;
+		int avgY = 0;
+		int n = 0;
+		for (int w = 0; w < width; w ++) {
+			for (int h = 0; h < height; h ++) {
+				if (phi[w][h] < 0) {
+					n++;
+					avgX += w;
+					avgY += h;
+				}
+			}
+		}
+		avgX /= n;
+		avgY /= n;
+		
+		for (int w = - EXPANDED_AREA_RADIUS; w <= EXPANDED_AREA_RADIUS; w ++) {
+			int h1 =  Math.abs(w) - EXPANDED_AREA_RADIUS + avgY;
+			int h2 = EXPANDED_AREA_RADIUS - Math.abs(w) + avgY;
+			int currW = avgX + w;
+			if (!outOfBounds(currW, h1)) {
+				ret.add(new Point(currW, h1));
+			}
+			if (!outOfBounds(currW, h2)) {
+				ret.add(new Point(currW, h2));
+			}
+		}
+		
+		return ret;
 	}
 
 }

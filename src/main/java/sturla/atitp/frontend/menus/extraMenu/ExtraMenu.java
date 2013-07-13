@@ -18,6 +18,7 @@ import sturla.atitp.frontend.imageops.extra.HoughTransformForLinesOperation;
 import sturla.atitp.frontend.imageops.extra.IsotropicDiffusionOperation;
 import sturla.atitp.frontend.imageops.extra.SIFTMatching;
 import sturla.atitp.frontend.imageops.extra.SequenceImageTrackingOperation;
+import sturla.atitp.frontend.imageops.extra.SimpleOcclussionTracking;
 import sturla.atitp.frontend.imageops.extra.SingleImageTrackingOperation;
 import sturla.atitp.frontend.imageops.extra.SupressNoMaxsOperation;
 
@@ -148,6 +149,17 @@ public class ExtraMenu extends JMenu {
 		    		mainFrame.currOperation = new SequenceImageTrackingOperation();
 				}
 			});
+	    JMenuItem occTracking = new JMenuItem("Simple Occlussion Tracking");
+	    occTracking.addActionListener(new ActionListener() {
+		    	@Override
+		    	public void actionPerformed(ActionEvent e) {
+		    		mainFrame.hideSliders();
+		    		mainFrame.displayTextFields(true);
+		    		mainFrame.onRectangleMoveDo = false;
+		    		mainFrame.value1.setVisible(true);
+		    		mainFrame.currOperation = new SimpleOcclussionTracking();
+				}
+			});
 	    JMenuItem sift = new JMenuItem("SIFT");
 	    sift.addActionListener(new ActionListener() {
 		    	@Override
@@ -169,6 +181,7 @@ public class ExtraMenu extends JMenu {
 		this.add(houghForCircles);
 		this.add(tracking);
 		this.add(seqTracking);
+		this.add(occTracking);
 		this.add(sift);
 
 		

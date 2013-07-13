@@ -751,6 +751,57 @@ public class RGBImage implements Image{
 		}
 		return trackingArea.getFinalArea();
 	}
+	
+	@Override
+	public void simpleOcclussionTracking(TrackingStats stats) {	
+		TrackingArea trackingArea = new TrackingArea(stats.getLastSelection(), red, blue, green, stats.getAvgIn(), stats.getAvgOut());
+		
+		stats.setAvgIn(trackingArea.getAverageIn());
+		stats.setAvgOut(trackingArea.getAverageOut());
+		List<Point> affectedPoints = new ArrayList<Point>();
+		while(!trackingArea.stoppingCondition()){
+			for (Point p : trackingArea.limitOut()) {
+				if (trackingArea.f(p) > 0) {
+					affectedPoints.add(p);
+				}
+			}
+			for (Point p : affectedPoints) {
+				trackingArea.switchIn(p);
+			}
+			affectedPoints.clear();
+			trackingArea.shrinkLimitIn();
+			for (Point p : trackingArea.limitIn()) {
+				if (trackingArea.f(p) < 0) {
+					affectedPoints.add(p);
+				}
+			}
+			for (Point p : affectedPoints) {
+				trackingArea.switchOut(p);
+			}
+			affectedPoints.clear();
+			trackingArea.shrinkLimitOut();
+			if (trackingArea.stoppingCondition()) {
+				trackingArea.smoothCurve();
+			}
+		}
+		List<Point> finalArea = trackingArea.getFinalArea();
+		markPoints(Color.MAGENTA, finalArea);
+		stats.addSelection(finalArea);
+		if (stats.isObjectLost()) {
+			stats.addSelection(trackingArea.getExpandedArea(stats.getLastCenter()));
+			stats.setLastCenter(trackingArea.getCenter());
+			// eye candy
+			markPoints(Color.CYAN, trackingArea.getExpandedAreaLimits());
+		}
+	}
+	
+	private void markPoints(Color markingColor, List<Point> points) {
+		for (Point p : points) {
+			red.setPixel(p.x, p.y, markingColor.getRed());
+			blue.setPixel(p.x, p.y, markingColor.getBlue());
+			green.setPixel(p.x, p.y, markingColor.getGreen());
+		}
+	}
 
 	@Override
 	public double[] getAvgIn() {

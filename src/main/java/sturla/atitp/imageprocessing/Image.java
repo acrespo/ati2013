@@ -139,6 +139,8 @@ public interface Image {
 
 	public List<Point> tracking(List<Point> selection, double[] avgIn, double[] avgOut);
 	
+	public void simpleOcclussionTracking(TrackingStats stats);
+	
 	public void paint(List<Point> points, Color color);
 	
 	
