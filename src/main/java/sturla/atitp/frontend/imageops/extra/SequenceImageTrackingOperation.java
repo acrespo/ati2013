@@ -18,11 +18,14 @@ import sturla.atitp.frontend.imageops.ImageOperation;
 import sturla.atitp.frontend.imageops.ImageOperationParameters;
 import sturla.atitp.imageprocessing.Image;
 import sturla.atitp.imageprocessing.Point;
+import sturla.atitp.imageprocessing.TrackingArea;
 
 public class SequenceImageTrackingOperation extends ImageOperation {
 	
 	private Iterator<File> files;
 	private List<Point> currentSurface;
+	private TrackingArea currentTrackingArea;
+	private TrackingArea lastArea;
 	private ImageLabelContainer result;
 	
 	private double[] avgIn;
@@ -40,19 +43,24 @@ public class SequenceImageTrackingOperation extends ImageOperation {
 		avgIn = new double[3];
 		avgOut = new double[3];
 		ActionListener trackNewImageAction = new ActionListener() {
-	    	@Override
+
+			@Override
 	    	public void actionPerformed(ActionEvent ae) {
 	    		if (files.hasNext()) {
 	    			try{
 	    				Image img = ImageLoader.loadImage(files.next());
 	    				if (first) {
 	    					System.out.println("Calculating new avgin and avgout");
-	    					currentSurface = img.tracking(currentSurface, null, null);
+							currentTrackingArea = img.tracking(currentSurface, lastArea, null, null);
+							currentSurface = currentTrackingArea.getFinalArea();
 	    					avgIn = img.getAvgIn();
 	    					avgOut = img.getAvgOut();
 	    					first = false;
+	    					lastArea = currentTrackingArea;
 	    				} else {
-	    					currentSurface = img.tracking(currentSurface, avgIn, avgOut);
+							currentTrackingArea = img.tracking(currentSurface, lastArea, avgIn, avgOut);
+							currentSurface = currentTrackingArea.getFinalArea();
+							lastArea = currentTrackingArea;
 	    				}
 	    				result.setImage(img);
 	    				timer.start();

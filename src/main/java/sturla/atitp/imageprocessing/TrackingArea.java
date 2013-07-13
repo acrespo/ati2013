@@ -5,7 +5,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-class TrackingArea {
+import math.geom2d.Point2D;
+
+public class TrackingArea {
 	
 	private static final int EXPANDED_AREA_RADIUS = 50;
 	
@@ -35,6 +37,10 @@ class TrackingArea {
 	private SingleChannel red;
 	private SingleChannel blue;
 	private SingleChannel green;
+	
+	private Point2D centroid = null;
+
+	private boolean sameColorOcclusion = false;	
 	
 	TrackingArea(List<Point> initial,
 			SingleChannel red, SingleChannel green, SingleChannel blue,
@@ -373,6 +379,23 @@ class TrackingArea {
 		}
 		
 		return ret;
+	}
+	
+	public Point2D getCentroid() {
+		return centroid;
+	}
+	
+	public void setCentroid(Point2D centroid) {
+		this.centroid = centroid;
+	}
+
+	public boolean hasSameColorOcclusion() {
+		return this.sameColorOcclusion;
+	}
+	
+	public void setSameColorOcclusion(boolean b) {
+		this.sameColorOcclusion = b;
+		
 	}
 
 }

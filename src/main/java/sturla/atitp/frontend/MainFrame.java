@@ -185,8 +185,8 @@ public class MainFrame extends JFrame {
 		coordX2 = new JTextField("0");
 		coordY2 = new JTextField("0");
 		rectangle = new DraggableComponent();
-		rectWidth = new JTextField("100");
-		rectHeight = new JTextField("100");
+		rectWidth = new JTextField("20");
+		rectHeight = new JTextField("20");
 		maskSize = new JTextField("5");
 		value1 = new JTextField("Value1");
 		value2 = new JTextField("Value2");
@@ -450,7 +450,7 @@ public class MainFrame extends JFrame {
 
 		public DraggableComponent() {
 			setBorder(new LineBorder(Color.BLUE, 3));
-			setBounds(0, 0, 100, 100);
+			setBounds(0, 0, 20, 20);
 			setOpaque(false);
 
 			addMouseListener(new MouseListener() {

@@ -137,7 +137,7 @@ public interface Image {
 	
 	public double[] getAvgOut();
 
-	public List<Point> tracking(List<Point> selection, double[] avgIn, double[] avgOut);
+	public TrackingArea tracking(List<Point> selection, TrackingArea lastArea, double[] avgIn, double[] avgOut);
 	
 	public void simpleOcclussionTracking(TrackingStats stats);
 	

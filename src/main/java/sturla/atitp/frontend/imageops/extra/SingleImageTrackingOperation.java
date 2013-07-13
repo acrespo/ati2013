@@ -22,7 +22,7 @@ public class SingleImageTrackingOperation extends ImageOperation {
 				initialSurface.add(new Point(i, j));
 			}
 		}
-		img.tracking(initialSurface, null, null);
+		img.tracking(initialSurface, null, null, null);
 		result.setImage(img);
 	}
 }

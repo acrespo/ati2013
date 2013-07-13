@@ -3,8 +3,12 @@ package sturla.atitp.imageprocessing;
 import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Queue;
 
+import math.geom2d.Point2D;
 import sturla.atitp.app.Utils;
 import sturla.atitp.imageprocessing.edgeDetector.EdgeDetector;
 import sturla.atitp.imageprocessing.synthesization.SynthesizationType;
@@ -19,8 +23,6 @@ public class RGBImage implements Image{
 	
 	private double[] avgIn;
 	private double[] avgOut;
-
-	
 	
 	public RGBImage(int height, int width, ImageFormat format, ImageType type) {
 		if( format == null ){
@@ -713,7 +715,7 @@ public class RGBImage implements Image{
 
 	
 	@Override
-	public List<Point> tracking(List<Point> selection, double[] avgIn, double[] avgOut) {	
+	public TrackingArea tracking(List<Point> selection, TrackingArea lastArea, double[] avgIn, double[] avgOut) {
 		TrackingArea trackingArea = new TrackingArea(selection, red, blue, green, avgIn, avgOut);
 		this.avgIn = trackingArea.getAverageIn();
 		this.avgOut = trackingArea.getAverageOut();
@@ -749,7 +751,70 @@ public class RGBImage implements Image{
 			blue.setPixel(p.x, p.y, markingColor.getBlue());
 			green.setPixel(p.x, p.y, markingColor.getGreen());
 		}
-		return trackingArea.getFinalArea();
+		
+		
+		// Handling same color occlusion
+		List<Point> set = trackingArea.getFinalArea();
+		List<Point2D> set2 = new ArrayList<Point2D>();
+		for (Point p: set) {
+			set2.add(p.toPoint2D());
+		}
+		if (!set2.isEmpty()) {
+			Point2D centroid = Point2D.centroid(set2);
+			System.out.println(centroid);
+			System.out.println(centroid.getAsInt());
+			System.out.println(centroid.x() + "  -  " + centroid.y());
+
+			if (lastArea != null && lastArea.getCentroid() != null &&
+					!trackingArea.hasSameColorOcclusion()) {
+				System.out.println("Distance " + centroid.distance(lastArea.getCentroid()));
+				if (centroid.distance(lastArea.getCentroid()) > 30) {
+					System.out.println("Occlusion!");
+					trackingArea.setSameColorOcclusion(true);
+				}	
+			}
+			Point centroidPoint = set.get(set.indexOf(new Point((int) centroid.x(), (int) centroid.y())));
+			markingColor = Color.BLUE;
+			System.out.println("centroidPoint:" + centroidPoint);
+			red.setPixel(centroidPoint.x, centroidPoint.y, markingColor.getRed());
+			blue.setPixel(centroidPoint.x, centroidPoint.y, markingColor.getBlue());
+			green.setPixel(centroidPoint.x, centroidPoint.y, markingColor.getGreen());
+			trackingArea.setCentroid(centroid);
+
+//			trackingArea = reappearance(trackingArea);
+
+		}
+		return trackingArea;
+	}
+
+	private TrackingArea reappearance(TrackingArea trackingArea) {
+
+		HashSet<Point> set = new HashSet<Point>(trackingArea.getFinalArea());
+		while (!set.isEmpty()) {
+			Point startPoint = set.iterator().next();
+
+
+			Queue<Point> queue = new LinkedList<Point>();
+			List<Point> list = new LinkedList<Point>();
+			queue.add(startPoint);
+			Point point;
+			while (!queue.isEmpty()) {
+				point = queue.poll();
+				if (!point.visited) {
+					list.add(point);
+					point.visited = true;
+					set.remove(point);
+				}
+				
+				for (Point p: point.N4()) {
+					if (!p.visited) {
+						queue.add(p);
+					}
+				}
+			}
+		}
+		
+		return trackingArea;
 	}
 	
 	@Override
