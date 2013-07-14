@@ -11,7 +11,7 @@ public class TrackingArea {
 	
 	private static final int EXPANDED_AREA_RADIUS = 50;
 	
-	private static int[][] DIRECTIONS = { {-1, 0}, {1, 0}, {0, -1}, {0, 1}};
+	static int[][] DIRECTIONS = { {-1, 0}, {1, 0}, {0, -1}, {0, 1}};
 	
 	private static int GAUSS_MASK_SIZE = 5;
 	private static double GAUSS_SIGMA = 0.5;
@@ -41,6 +41,8 @@ public class TrackingArea {
 	private Point2D centroid = null;
 
 	private boolean sameColorOcclusion = false;	
+	
+	private boolean occludedByLarger = false;
 	
 	TrackingArea(List<Point> initial,
 			SingleChannel red, SingleChannel green, SingleChannel blue,
@@ -399,8 +401,11 @@ public class TrackingArea {
 	}
 
 	public boolean belongsToObject(Point p) {
-		System.out.println(p + " - " + outOfBounds(p.x, p.y) + "- phi = " +  phi[p.x][p.y]);
-		return !outOfBounds(p.x, p.y) && phi[p.x][p.y] < 0;
+		boolean ret = !outOfBounds(p.x, p.y) && phi[p.x][p.y] < 0;
+		if (ret) {
+//			System.out.println("AL FIN");
+		}
+		return ret;
 	}
 	
 	public void removePoints(List<Point> list) {
@@ -409,6 +414,18 @@ public class TrackingArea {
 			phi[p.x][p.y] = 3;
 			limitOut.remove(p);			
 		}
+	}
+	
+	public boolean isOccludedByLarger() {
+		return occludedByLarger;
+	}
+	
+	public void setOccludedByLarger(boolean occludedByLarger) {
+		this.occludedByLarger = occludedByLarger;
+	}
+	
+	public boolean isSameColorOcclusion() {
+		return sameColorOcclusion;
 	}
 	
 }

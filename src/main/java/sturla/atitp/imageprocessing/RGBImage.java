@@ -2,30 +2,31 @@ package sturla.atitp.imageprocessing;
 
 import java.awt.Color;
 import java.awt.image.BufferedImage;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Deque;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.Queue;
+import java.util.Set;
 
 import math.geom2d.Point2D;
 import sturla.atitp.app.Utils;
 import sturla.atitp.imageprocessing.edgeDetector.EdgeDetector;
 import sturla.atitp.imageprocessing.synthesization.SynthesizationType;
 
-public class RGBImage implements Image{
-	
+public class RGBImage implements Image {
+
 	private ImageType type;
 	private ImageFormat format;
 	private SingleChannel red;
 	private SingleChannel green;
 	private SingleChannel blue;
-	
+
 	private double[] avgIn;
 	private double[] avgOut;
-	
+
 	public RGBImage(int height, int width, ImageFormat format, ImageType type) {
-		if( format == null ){
+		if (format == null) {
 			throw new IllegalArgumentException("ImageFormat can't be null");
 		}
 		this.red = new SingleChannel(width, height);
@@ -35,7 +36,7 @@ public class RGBImage implements Image{
 		this.format = format;
 		this.type = type;
 	}
-	
+
 	public RGBImage(int height, int width) {
 
 		this.red = new SingleChannel(width, height);
@@ -43,22 +44,10 @@ public class RGBImage implements Image{
 		this.blue = new SingleChannel(width, height);
 	}
 
-	public RGBImage(BufferedImage bi, ImageFormat format, ImageType type){
+	public RGBImage(BufferedImage bi, ImageFormat format, ImageType type) {
 		this(bi.getHeight(), bi.getWidth(), format, type);
-		for(int x = 0 ; x < bi.getWidth() ; x++){
-			for(int y = 0 ; y < bi.getHeight() ; y++ ){
-				Color c = new Color(bi.getRGB(x, y));
-				red.setPixel(x, y, c.getRed());
-				green.setPixel(x, y, c.getGreen());
-				blue.setPixel(x, y, c.getBlue());
-			}
-		}
-	}
-	
-	public RGBImage(BufferedImage bi){
-		this(bi.getHeight(), bi.getWidth());
-		for(int x = 0 ; x < bi.getWidth() ; x++){
-			for(int y = 0 ; y < bi.getHeight() ; y++ ){
+		for (int x = 0; x < bi.getWidth(); x++) {
+			for (int y = 0; y < bi.getHeight(); y++) {
 				Color c = new Color(bi.getRGB(x, y));
 				red.setPixel(x, y, c.getRed());
 				green.setPixel(x, y, c.getGreen());
@@ -67,8 +56,20 @@ public class RGBImage implements Image{
 		}
 	}
 
-	private RGBImage(SingleChannel red, SingleChannel green, SingleChannel blue, 
-			ImageFormat format, ImageType type){
+	public RGBImage(BufferedImage bi) {
+		this(bi.getHeight(), bi.getWidth());
+		for (int x = 0; x < bi.getWidth(); x++) {
+			for (int y = 0; y < bi.getHeight(); y++) {
+				Color c = new Color(bi.getRGB(x, y));
+				red.setPixel(x, y, c.getRed());
+				green.setPixel(x, y, c.getGreen());
+				blue.setPixel(x, y, c.getBlue());
+			}
+		}
+	}
+
+	private RGBImage(SingleChannel red, SingleChannel green,
+			SingleChannel blue, ImageFormat format, ImageType type) {
 		this.red = red;
 		this.green = green;
 		this.blue = blue;
@@ -78,40 +79,40 @@ public class RGBImage implements Image{
 
 	public void setPixel(int x, int y, Channel channel, double color) {
 
-		if( !red.validPixel(x, y)){
+		if (!red.validPixel(x, y)) {
 			throw new IllegalArgumentException("Invalid pixels on setPixel");
 		}
 
-		if( channel == Channel.RED ){
+		if (channel == Channel.RED) {
 			red.setPixel(x, y, color);
 			return;
 		}
-		if( channel == Channel.GREEN ){
+		if (channel == Channel.GREEN) {
 			green.setPixel(x, y, color);
 			return;
 		}
-		if( channel == Channel.BLUE ){
+		if (channel == Channel.BLUE) {
 			blue.setPixel(x, y, color);
 			return;
 		}
 		throw new IllegalStateException();
 	}
-	
+
 	public void setInsidePixel(int x, int y, Channel channel, double color) {
 
-		if( !red.validPixel(x, y)){
+		if (!red.validPixel(x, y)) {
 			return;
 		}
 
-		if( channel == Channel.RED ){
+		if (channel == Channel.RED) {
 			red.setPixel(x, y, color);
 			return;
 		}
-		if( channel == Channel.GREEN ){
+		if (channel == Channel.GREEN) {
 			green.setPixel(x, y, color);
 			return;
 		}
-		if( channel == Channel.BLUE ){
+		if (channel == Channel.BLUE) {
 			blue.setPixel(x, y, color);
 			return;
 		}
@@ -124,7 +125,7 @@ public class RGBImage implements Image{
 		this.setPixel(x, y, Channel.GREEN, Utils.getGreenFromRGB(rgb));
 		this.setPixel(x, y, Channel.BLUE, Utils.getBlueFromRGB(rgb));
 	}
-	
+
 	public void setInsideRGBPixel(int x, int y, int rgb) {
 		this.setInsidePixel(x, y, Channel.RED, Utils.getRedFromRGB(rgb));
 		this.setInsidePixel(x, y, Channel.GREEN, Utils.getGreenFromRGB(rgb));
@@ -143,13 +144,13 @@ public class RGBImage implements Image{
 
 	@Override
 	public double getPixelFromChannel(int x, int y, Channel channel) {
-		if( channel == Channel.RED ){
+		if (channel == Channel.RED) {
 			return red.getPixel(x, y);
 		}
-		if( channel == Channel.GREEN ){
+		if (channel == Channel.GREEN) {
 			return green.getPixel(x, y);
 		}
-		if( channel == Channel.BLUE ){
+		if (channel == Channel.BLUE) {
 			return blue.getPixel(x, y);
 		}
 		throw new IllegalStateException();
@@ -157,9 +158,12 @@ public class RGBImage implements Image{
 
 	@Override
 	public int getRGBPixel(int x, int y) {
-		int red = this.red.truncatePixel(getPixelFromChannel(x, y, Channel.RED));
-		int green = this.green.truncatePixel(getPixelFromChannel(x, y, Channel.GREEN));
-		int blue = this.blue.truncatePixel(getPixelFromChannel(x, y, Channel.BLUE));
+		int red = this.red
+				.truncatePixel(getPixelFromChannel(x, y, Channel.RED));
+		int green = this.green.truncatePixel(getPixelFromChannel(x, y,
+				Channel.GREEN));
+		int blue = this.blue.truncatePixel(getPixelFromChannel(x, y,
+				Channel.BLUE));
 		return new Color(red, green, blue).getRGB();
 	}
 
@@ -184,7 +188,7 @@ public class RGBImage implements Image{
 
 	@Override
 	public Image add(Image img) {
-		RGBImage ci = (RGBImage)img;
+		RGBImage ci = (RGBImage) img;
 
 		this.red.add(ci.red);
 		this.green.add(ci.green);
@@ -194,7 +198,7 @@ public class RGBImage implements Image{
 
 	@Override
 	public Image multiply(Image img) {
-		RGBImage ci = (RGBImage)img;
+		RGBImage ci = (RGBImage) img;
 
 		this.red.multiply(ci.red);
 		this.green.multiply(ci.green);
@@ -204,7 +208,7 @@ public class RGBImage implements Image{
 
 	@Override
 	public Image substract(Image img) {
-		RGBImage ci = (RGBImage)img;
+		RGBImage ci = (RGBImage) img;
 
 		this.red.substract(ci.red);
 		this.green.substract(ci.green);
@@ -216,14 +220,16 @@ public class RGBImage implements Image{
 	public void dynamicRangeCompression() {
 		double max = -Double.MAX_VALUE;
 		double min = Double.MAX_VALUE;
-		for(int i = 0; i < this.getWidth(); i++) {
-			for(int j = 0; j < this.getHeight(); j++) {
+		for (int i = 0; i < this.getWidth(); i++) {
+			for (int j = 0; j < this.getHeight(); j++) {
 				double redPixel = red.getPixel(i, j);
 				double greenPixel = green.getPixel(i, j);
 				double bluePixel = blue.getPixel(i, j);
 
-				min = Math.min(Math.min(min, redPixel), Math.min(greenPixel, bluePixel));
-				max = Math.max(Math.max(max, redPixel), Math.max(greenPixel, bluePixel));
+				min = Math.min(Math.min(min, redPixel),
+						Math.min(greenPixel, bluePixel));
+				max = Math.max(Math.max(max, redPixel),
+						Math.max(greenPixel, bluePixel));
 			}
 		}
 
@@ -236,7 +242,7 @@ public class RGBImage implements Image{
 	public void negative() {
 		this.red.negative();
 		this.blue.negative();
-		this.green.negative();		
+		this.green.negative();
 	}
 
 	@Override
@@ -266,17 +272,18 @@ public class RGBImage implements Image{
 		double green = this.green.getPixel(x, y);
 		double blue = this.blue.getPixel(x, y);
 
-		return (red + green + blue)/3.0;
+		return (red + green + blue) / 3.0;
 	}
 
 	@Override
 	public double[] getHistogramPixels() {
- 		double[] result = new double[this.getHeight()*this.getWidth()];
- 		
- 		for(int i = 0 ; i < result.length ; i++){
- 			result[i] = getGraylevelFromPixel(i % this.getWidth(), i/this.getWidth());
- 		}
- 		
+		double[] result = new double[this.getHeight() * this.getWidth()];
+
+		for (int i = 0; i < result.length; i++) {
+			result[i] = getGraylevelFromPixel(i % this.getWidth(),
+					i / this.getWidth());
+		}
+
 		return result;
 	}
 
@@ -287,13 +294,14 @@ public class RGBImage implements Image{
 		this.blue.multiply(scalar);
 	}
 
-
 	@Override
 	public void whiteNoise(double stdDev) {
-		SingleChannel noisyChannel = new SingleChannel(this.getWidth(), this.getHeight());
-		for(int x = 0; x < noisyChannel.getWidth(); x++) {
-			for(int y = 0; y < noisyChannel.getHeight() ; y++) {
-				double noiseLevel = RandomGenerator.getGaussian(0, SingleChannel.MAX_CHANNEL_COLOR * stdDev);
+		SingleChannel noisyChannel = new SingleChannel(this.getWidth(),
+				this.getHeight());
+		for (int x = 0; x < noisyChannel.getWidth(); x++) {
+			for (int y = 0; y < noisyChannel.getHeight(); y++) {
+				double noiseLevel = RandomGenerator.getGaussian(0,
+						SingleChannel.MAX_CHANNEL_COLOR * stdDev);
 				noisyChannel.setPixel(x, y, noiseLevel);
 			}
 		}
@@ -304,9 +312,10 @@ public class RGBImage implements Image{
 
 	@Override
 	public void rayleighNoise(double mean) {
-		SingleChannel noisyChannel = new SingleChannel(this.getWidth(), this.getHeight());
-		for(int x = 0; x < noisyChannel.getWidth(); x++) {
-			for(int y = 0; y < noisyChannel.getHeight() ; y++) {
+		SingleChannel noisyChannel = new SingleChannel(this.getWidth(),
+				this.getHeight());
+		for (int x = 0; x < noisyChannel.getWidth(); x++) {
+			for (int y = 0; y < noisyChannel.getHeight(); y++) {
 				double noiseLevel = RandomGenerator.getRayleigh(mean);
 				noisyChannel.setPixel(x, y, noiseLevel);
 			}
@@ -318,9 +327,10 @@ public class RGBImage implements Image{
 
 	@Override
 	public void exponentialNoise(double mean) {
-		SingleChannel noisyChannel = new SingleChannel(this.getWidth(), this.getHeight());
-		for(int x = 0; x < noisyChannel.getWidth(); x++) {
-			for(int y = 0; y < noisyChannel.getHeight() ; y++) {
+		SingleChannel noisyChannel = new SingleChannel(this.getWidth(),
+				this.getHeight());
+		for (int x = 0; x < noisyChannel.getWidth(); x++) {
+			for (int y = 0; y < noisyChannel.getHeight(); y++) {
 				double noiseLevel = RandomGenerator.getExponential(mean);
 				noisyChannel.setPixel(x, y, noiseLevel);
 			}
@@ -332,8 +342,8 @@ public class RGBImage implements Image{
 
 	@Override
 	public void saltAndPepperNoise(double minLimit, double maxLimit) {
-		for(int x = 0; x < this.getWidth(); x++) {
-			for(int y = 0; y < this.getHeight() ; y++) {
+		for (int x = 0; x < this.getWidth(); x++) {
+			for (int y = 0; y < this.getHeight(); y++) {
 				double random = RandomGenerator.getUniform(0, 1);
 				if (random < minLimit) {
 					double noiseLevel = SingleChannel.MIN_CHANNEL_COLOR;
@@ -364,24 +374,24 @@ public class RGBImage implements Image{
 		this.blue.applyMedianMask(maskSize, w, h, endW, endH);
 	}
 
-	public Point getCenter(){
+	public Point getCenter() {
 
-		int x = (int) Math.floor(getWidth()/2);
-		int y = (int) Math.floor(getHeight()/2);
+		int x = (int) Math.floor(getWidth() / 2);
+		int y = (int) Math.floor(getHeight() / 2);
 
 		return new Point(x, y);
 	}
 
 	@Override
 	public Image copy() {
-		return new RGBImage(this.red.copy(), this.green.copy(), this.blue.copy(),
-				this.format, this.type);
+		return new RGBImage(this.red.copy(), this.green.copy(),
+				this.blue.copy(), this.format, this.type);
 	}
-	
+
 	private int[] getRgbArray() {
 		int[] array = new int[getWidth() * getHeight()];
-		for (int j = 0; j < getHeight(); j ++) {
-			for (int i = 0; i < getWidth(); i ++) {
+		for (int j = 0; j < getHeight(); j++) {
+			for (int i = 0; i < getWidth(); i++) {
 				array[getWidth() * j + i] = getRGBPixel(i, j);
 			}
 		}
@@ -390,17 +400,19 @@ public class RGBImage implements Image{
 
 	@Override
 	public BufferedImage toBufferedImage() {
-		BufferedImage buff = new BufferedImage(getWidth(), getHeight(), BufferedImage.TYPE_4BYTE_ABGR_PRE);
+		BufferedImage buff = new BufferedImage(getWidth(), getHeight(),
+				BufferedImage.TYPE_4BYTE_ABGR_PRE);
 		buff.setRGB(0, 0, getWidth(), getHeight(), getRgbArray(), 0, getWidth());
 		return buff;
 	}
-	
+
 	@Override
 	public BufferedImage thresholdBinaryImage(double t) {
-		BufferedImage buff = new BufferedImage(getWidth(), getHeight(), BufferedImage.TYPE_4BYTE_ABGR_PRE);
+		BufferedImage buff = new BufferedImage(getWidth(), getHeight(),
+				BufferedImage.TYPE_4BYTE_ABGR_PRE);
 		int[] rgbArray = new int[getWidth() * getHeight()];
-		for (int j = 0; j < getHeight(); j ++) {
-			for (int i = 0; i < getWidth(); i ++) {
+		for (int j = 0; j < getHeight(); j++) {
+			for (int i = 0; i < getWidth(); i++) {
 				double r = red.getPixel(i, j);
 				double g = green.getPixel(i, j);
 				double b = blue.getPixel(i, j);
@@ -418,14 +430,15 @@ public class RGBImage implements Image{
 	}
 
 	@Override
-	public void applyIsotropicDiffusion(int iterations){
+	public void applyIsotropicDiffusion(int iterations) {
 		this.red.applyIsotropicDiffusion(iterations);
 		this.green.applyIsotropicDiffusion(iterations);
 		this.blue.applyIsotropicDiffusion(iterations);
 	}
-	
+
 	@Override
-	public void applyAnisotropicDiffusion(double lambda, int iterations, EdgeDetector bd){
+	public void applyAnisotropicDiffusion(double lambda, int iterations,
+			EdgeDetector bd) {
 		this.red.applyAnisotropicDiffusion(lambda, iterations, bd);
 		this.green.applyAnisotropicDiffusion(lambda, iterations, bd);
 		this.blue.applyAnisotropicDiffusion(lambda, iterations, bd);
@@ -448,113 +461,124 @@ public class RGBImage implements Image{
 		TwoMaskContainer mc = MaskFactory.buildSobelMasks();
 		applyTwoMasksAndSynth(mc, st);
 	}
-	
+
 	@Override
-	public void applyMaskAEdgeDetection(SynthesizationType st){
+	public void applyMaskAEdgeDetection(SynthesizationType st) {
 		FourMaskContainer mc = MaskFactory.buildMaskA();
 		applyFourMasksAndSynth(mc, st);
 	}
-	
+
 	@Override
-	public void applyMaskBKirshEdgeDetection(SynthesizationType st){
+	public void applyMaskBKirshEdgeDetection(SynthesizationType st) {
 		FourMaskContainer mc = MaskFactory.buildMaskBKirsh();
 		applyFourMasksAndSynth(mc, st);
 	}
-	
+
 	@Override
-	public void applyMaskCEdgeDetection(SynthesizationType st){
+	public void applyMaskCEdgeDetection(SynthesizationType st) {
 		FourMaskContainer mc = MaskFactory.buildMaskC();
 		applyFourMasksAndSynth(mc, st);
 	}
-	
+
 	@Override
-	public void applyMaskDEdgeDetection(SynthesizationType st){
+	public void applyMaskDEdgeDetection(SynthesizationType st) {
 		FourMaskContainer mc = MaskFactory.buildMaskD();
 		applyFourMasksAndSynth(mc, st);
 	}
-	
-	private void applyTwoMasksAndSynth(TwoMaskContainer mc, SynthesizationType st){
+
+	private void applyTwoMasksAndSynth(TwoMaskContainer mc,
+			SynthesizationType st) {
 		RGBImage imageCopy = (RGBImage) this.copy();
-		
-		this.applyMask(mc.getDXMask(), 1, 1, imageCopy.getWidth() -1, imageCopy.getHeight()-1);
-		imageCopy.applyMask(mc.getDYMask(), 1, 1, imageCopy.getWidth()-1, imageCopy.getHeight()-1);
-		
+
+		this.applyMask(mc.getDXMask(), 1, 1, imageCopy.getWidth() - 1,
+				imageCopy.getHeight() - 1);
+		imageCopy.applyMask(mc.getDYMask(), 1, 1, imageCopy.getWidth() - 1,
+				imageCopy.getHeight() - 1);
+
 		this.synthesize(st, imageCopy);
 	}
-	
-	private void applyFourMasksAndSynth(FourMaskContainer mc, SynthesizationType st){
+
+	private void applyFourMasksAndSynth(FourMaskContainer mc,
+			SynthesizationType st) {
 		RGBImage imageCopy2 = (RGBImage) this.copy();
 		RGBImage imageCopy3 = (RGBImage) this.copy();
 		RGBImage imageCopy4 = (RGBImage) this.copy();
-		
-		this.applyMask(mc.getMask0(), 1, 1, this.getWidth()-1, this.getHeight()-1);
-		imageCopy2.applyMask(mc.getMask45(), 1, 1, imageCopy2.getWidth()-1, imageCopy2.getHeight()-1);
-		imageCopy3.applyMask(mc.getMask90(), 1, 1, imageCopy3.getWidth()-1, imageCopy3.getHeight()-1);
-		imageCopy4.applyMask(mc.getMask135(), 1, 1, imageCopy4.getWidth()-1, imageCopy4.getHeight()-1);
-		
+
+		this.applyMask(mc.getMask0(), 1, 1, this.getWidth() - 1,
+				this.getHeight() - 1);
+		imageCopy2.applyMask(mc.getMask45(), 1, 1, imageCopy2.getWidth() - 1,
+				imageCopy2.getHeight() - 1);
+		imageCopy3.applyMask(mc.getMask90(), 1, 1, imageCopy3.getWidth() - 1,
+				imageCopy3.getHeight() - 1);
+		imageCopy4.applyMask(mc.getMask135(), 1, 1, imageCopy4.getWidth() - 1,
+				imageCopy4.getHeight() - 1);
+
 		this.synthesize(st, imageCopy2, imageCopy3, imageCopy4);
 	}
 
 	@Override
-	public void synthesize(SynthesizationType st, Image ... imgs){
+	public void synthesize(SynthesizationType st, Image... imgs) {
 		Image[] cimgs = imgs;
-		
+
 		SingleChannel[] redChnls = new SingleChannel[cimgs.length];
 		SingleChannel[] greenChnls = new SingleChannel[cimgs.length];
 		SingleChannel[] blueChnls = new SingleChannel[cimgs.length];
-		
-		for(int i = 0 ; i < cimgs.length ; i++ ){
-			redChnls[i] = ((RGBImage)cimgs[i]).red;
-			greenChnls[i] = ((RGBImage)cimgs[i]).green;
-			blueChnls[i] = ((RGBImage)cimgs[i]).blue;
+
+		for (int i = 0; i < cimgs.length; i++) {
+			redChnls[i] = ((RGBImage) cimgs[i]).red;
+			greenChnls[i] = ((RGBImage) cimgs[i]).green;
+			blueChnls[i] = ((RGBImage) cimgs[i]).blue;
 		}
-		
+
 		this.red.synthesize(st, redChnls);
 		this.green.synthesize(st, greenChnls);
 		this.blue.synthesize(st, blueChnls);
-		
+
 	}
-	
+
 	@Override
-	public void applyLaplaceMask(int w, int h, int endW, int endH){
+	public void applyLaplaceMask(int w, int h, int endW, int endH) {
 		this.applyMask(MaskFactory.buildLaplaceMask(), w, h, endW, endH);
 	}
-	
+
 	@Override
-	public void applyLaplaceVarianceMask(int varianceThreshold, int w, int h, int endW, int endH) {
+	public void applyLaplaceVarianceMask(int varianceThreshold, int w, int h,
+			int endW, int endH) {
 		this.applyMask(MaskFactory.buildLaplaceMask(), w, h, endW, endH);
 
 		this.red.localVarianceEvaluation(varianceThreshold);
 		this.green.localVarianceEvaluation(varianceThreshold);
 		this.blue.localVarianceEvaluation(varianceThreshold);
 	}
-	
+
 	@Override
-	public void applyLaplaceGaussianMask(int maskSize, double sigma, int w, int h, int endW, int endH) {
-		this.applyMask(MaskFactory.buildLaplaceGaussianMask(maskSize, sigma), w, h, endW, endH);
+	public void applyLaplaceGaussianMask(int maskSize, double sigma, int w,
+			int h, int endW, int endH) {
+		this.applyMask(MaskFactory.buildLaplaceGaussianMask(maskSize, sigma),
+				w, h, endW, endH);
 	}
-	
+
 	@Override
-	public void applyZeroCrossing(double threshold){
+	public void applyZeroCrossing(double threshold) {
 		this.red.zeroCross(threshold);
 		this.green.zeroCross(threshold);
 		this.blue.zeroCross(threshold);
 	}
-	
+
 	@Override
 	public void globalThreshold() {
 		this.red.globalThreshold();
 		this.green.globalThreshold();
 		this.blue.globalThreshold();
 	}
-	
+
 	@Override
 	public void otsuThreshold() {
 		this.red.otsuThreshold();
 		this.green.otsuThreshold();
 		this.blue.otsuThreshold();
 	}
-	
+
 	@Override
 	public void binaryGlobalThreshold() {
 		SingleChannel ch = getGreyChannel();
@@ -563,7 +587,7 @@ public class RGBImage implements Image{
 		green = ch;
 		blue = ch;
 	}
-	
+
 	@Override
 	public void binaryOtsuThreshold() {
 		SingleChannel ch = getGreyChannel();
@@ -572,34 +596,36 @@ public class RGBImage implements Image{
 		green = ch;
 		blue = ch;
 	}
-	
+
 	private SingleChannel getGreyChannel() {
 		SingleChannel ch = new SingleChannel(getWidth(), getHeight());
-		for (int i = 0; i < getHeight(); i ++) {
-			for (int j = 0; j < getWidth(); j ++) {
-				double grey = (red.getPixel(j, i) + green.getPixel(j, i) + blue.getPixel(j, i)) / 3;
+		for (int i = 0; i < getHeight(); i++) {
+			for (int j = 0; j < getWidth(); j++) {
+				double grey = (red.getPixel(j, i) + green.getPixel(j, i) + blue
+						.getPixel(j, i)) / 3;
 				ch.setPixel(j, i, grey);
 			}
 		}
 		return ch;
 	}
-	
+
 	@Override
 	public void suppressNoMaxs() {
 		this.red.suppressNoMaxs();
 		this.green.suppressNoMaxs();
 		this.blue.suppressNoMaxs();
 	}
-	
+
 	@Override
 	public void applyCannyEdgeDetection() {
 		this.red.applyCannyEdgeDetection();
 		this.green.applyCannyEdgeDetection();
 		this.blue.applyCannyEdgeDetection();
 	}
-	
+
 	@Override
-	public void thresholdWithHysteresis(double lowThreshold, double highThreshold) {
+	public void thresholdWithHysteresis(double lowThreshold,
+			double highThreshold) {
 		this.red.thresholdWithHysteresis(lowThreshold, highThreshold);
 		this.green.thresholdWithHysteresis(lowThreshold, highThreshold);
 		this.blue.thresholdWithHysteresis(lowThreshold, highThreshold);
@@ -615,15 +641,16 @@ public class RGBImage implements Image{
 		Mask mask = MaskFactory.buildSusanMask();
 		List<Point> edges = new ArrayList<Point>();
 		List<Point> corners = new ArrayList<Point>();
-		for( int x = 0 ; x < getWidth() ; x++ ){
-			for( int y = 0 ; y < getHeight() ; y++){
+		for (int x = 0; x < getWidth(); x++) {
+			for (int y = 0; y < getHeight(); y++) {
 				double r = red.applySusanPixelMask(x, y, mask);
 				double g = green.applySusanPixelMask(x, y, mask);
 				double b = blue.applySusanPixelMask(x, y, mask);
-				if(detectEdges && (isEdge(r) || isEdge(g) || isEdge(b))) {
+				if (detectEdges && (isEdge(r) || isEdge(g) || isEdge(b))) {
 					edges.add(new Point(x, y));
 				}
-				if(detectCorners && (isCorner(r) || isCorner(g) || isCorner(b))) {
+				if (detectCorners
+						&& (isCorner(r) || isCorner(g) || isCorner(b))) {
 					corners.add(new Point(x, y));
 				}
 			}
@@ -646,21 +673,24 @@ public class RGBImage implements Image{
 			setInsideRGBPixel(point.x, point.y + 2, Color.MAGENTA.getRGB());
 		}
 	}
-	
+
 	private boolean isEdge(double s) {
 		double lowLimit = 0.375;
 		double highLimit = 0.625;
 		return s > lowLimit && s <= highLimit;
 	}
-	
+
 	private boolean isCorner(double s) {
 		double lowLimit = 0.60;
 		double highLimit = 0.90;
-		
+
 		double lowLimit2 = 0.24;
 		double highLimit2 = 0.26;
-		
-		return (s > lowLimit && s <= highLimit)/* || (s > lowLimit2 && s <= highLimit2)*/;
+
+		return (s > lowLimit && s <= highLimit)/*
+												 * || (s > lowLimit2 && s <=
+												 * highLimit2)
+												 */;
 	}
 
 	@Override
@@ -671,13 +701,13 @@ public class RGBImage implements Image{
 		calc.binaryOtsuThreshold();
 		calc.red.houghTransformForLines(0.75, 1, 1, this, minLines);
 	}
-	
+
 	private void blackEdges() {
-		for (int i = 0; i < getWidth(); i ++) {
+		for (int i = 0; i < getWidth(); i++) {
 			setRGBPixel(i, 0, Color.BLACK.getRGB());
 			setRGBPixel(i, getHeight() - 1, Color.BLACK.getRGB());
 		}
-		for (int i = 0; i < getHeight(); i ++) {
+		for (int i = 0; i < getHeight(); i++) {
 			setRGBPixel(0, i, Color.BLACK.getRGB());
 			setRGBPixel(getWidth() - 1, i, Color.BLACK.getRGB());
 		}
@@ -691,10 +721,12 @@ public class RGBImage implements Image{
 		calc.binaryOtsuThreshold();
 		calc.red.houghTransformForCircles(5, 3, 3, 3, this, minCircles);
 	}
-	
+
 	@Override
-	public void applyHarrisCornerDetector(int masksize, double sigma, double r, double k) {
-		List<java.awt.Point> points = red.applyHarrisCornerDetector(masksize, sigma, r, k);
+	public void applyHarrisCornerDetector(int masksize, double sigma, double r,
+			double k) {
+		List<java.awt.Point> points = red.applyHarrisCornerDetector(masksize,
+				sigma, r, k);
 		for (java.awt.Point point : points) {
 			this.setInsideRGBPixel(point.x - 1, point.y, Color.MAGENTA.getRGB());
 			this.setInsideRGBPixel(point.x - 2, point.y, Color.MAGENTA.getRGB());
@@ -713,14 +745,15 @@ public class RGBImage implements Image{
 		return this.red.validPixel(x, y);
 	}
 
-	
 	@Override
-	public TrackingArea tracking(List<Point> selection, TrackingArea lastArea, double[] avgIn, double[] avgOut) {
-		TrackingArea trackingArea = new TrackingArea(selection, red, blue, green, avgIn, avgOut);
+	public TrackingArea tracking(List<Point> selection, TrackingArea lastArea,
+			double[] avgIn, double[] avgOut) {
+		TrackingArea trackingArea = new TrackingArea(selection, red, blue,
+				green, avgIn, avgOut);
 		this.avgIn = trackingArea.getAverageIn();
 		this.avgOut = trackingArea.getAverageOut();
 		List<Point> affectedPoints = new ArrayList<Point>();
-		while(!trackingArea.stoppingCondition()){
+		while (!trackingArea.stoppingCondition()) {
 			for (Point p : trackingArea.limitOut()) {
 				if (trackingArea.f(p) > 0) {
 					affectedPoints.add(p);
@@ -751,33 +784,44 @@ public class RGBImage implements Image{
 			blue.setPixel(p.x, p.y, markingColor.getBlue());
 			green.setPixel(p.x, p.y, markingColor.getGreen());
 		}
-		
-		
+
 		// Handling same color occlusion
 		List<Point> list = trackingArea.getFinalArea();
 		List<Point2D> list2 = toPoint2D(list);
 		if (!list2.isEmpty()) {
 			Point2D centroid = Point2D.centroid(list2);
-			System.out.println(centroid);
-			System.out.println(centroid.getAsInt());
-			System.out.println(centroid.x() + "  -  " + centroid.y());
+			// System.out.println(centroid);
+			// System.out.println(centroid.getAsInt());
+			// System.out.println(centroid.x() + "  -  " + centroid.y());
+			
+			if (lastArea != null) {
+				trackingArea.setSameColorOcclusion(lastArea.isSameColorOcclusion());
+				trackingArea.setOccludedByLarger(lastArea.isOccludedByLarger());
+			}
 
-			if (lastArea != null && lastArea.getCentroid() != null &&
-					!trackingArea.hasSameColorOcclusion()) {
-				System.out.println("Distance " + centroid.distance(lastArea.getCentroid()));
+			if (lastArea != null && lastArea.getCentroid() != null
+					&& !trackingArea.hasSameColorOcclusion()) {
+//				System.out.println("Distance "
+//						+ centroid.distance(lastArea.getCentroid()));
 				if (centroid.distance(lastArea.getCentroid()) > 30) {
 					System.out.println("Occlusion!");
 					trackingArea.setSameColorOcclusion(true);
-				}	
+					trackingArea.setOccludedByLarger(lastArea.getFinalArea().size() * 2 < trackingArea.getFinalArea().size());
+					System.out.println(trackingArea.isOccludedByLarger());
+				}
 			}
-			Point centroidPoint = list.get(list.indexOf(new Point((int) centroid.x(), (int) centroid.y())));
+			Point centroidPoint = list.get(list.indexOf(new Point(
+					(int) centroid.x(), (int) centroid.y())));
 			markingColor = Color.BLUE;
-			red.setPixel(centroidPoint.x, centroidPoint.y, markingColor.getRed());
-			blue.setPixel(centroidPoint.x, centroidPoint.y, markingColor.getBlue());
-			green.setPixel(centroidPoint.x, centroidPoint.y, markingColor.getGreen());
+			red.setPixel(centroidPoint.x, centroidPoint.y,
+					markingColor.getRed());
+			blue.setPixel(centroidPoint.x, centroidPoint.y,
+					markingColor.getBlue());
+			green.setPixel(centroidPoint.x, centroidPoint.y,
+					markingColor.getGreen());
 			trackingArea.setCentroid(centroid);
 
-			if(trackingArea.hasSameColorOcclusion()) {
+			if (trackingArea.hasSameColorOcclusion()) {
 				trackingArea = reappearance(trackingArea, lastArea);
 			}
 		}
@@ -786,78 +830,90 @@ public class RGBImage implements Image{
 
 	private List<Point2D> toPoint2D(List<Point> list) {
 		List<Point2D> list2 = new ArrayList<Point2D>();
-		for (Point p: list) {
+		for (Point p : list) {
 			list2.add(p.toPoint2D());
 		}
 		return list2;
 	}
 
-	private TrackingArea reappearance(TrackingArea trackingArea, TrackingArea lastArea) {
+	private TrackingArea reappearance(TrackingArea trackingArea,
+			TrackingArea lastArea) {
 
 		HashSet<Point> set = new HashSet<Point>(trackingArea.getFinalArea());
+		if (set.isEmpty()) {
+			return trackingArea;
+		}
+		Point startPoint = set.iterator().next();
+		// System.out.println("a : " + set.size() );
+		List<Point> currentList = bfs(set, startPoint, trackingArea);
+//		System.out.println("Elements curr: " + currentList.size());
+
 		while (!set.isEmpty()) {
-			Point startPoint = set.iterator().next();
-			System.out.println("a : " + set.size() );
-			List<Point> list1 = bfs(set, startPoint, trackingArea);
-			
-			if (!set.isEmpty()) {
-				System.out.println("Object Reappeared!");
-				trackingArea.setSameColorOcclusion(false);
-				//Object has reappeared
-				startPoint = set.iterator().next();
-				List<Point> list2 = bfs(set, startPoint, trackingArea);
-				
-				Point2D centroid1 = Point2D.centroid(toPoint2D(list1));
-				Point2D centroid2 = Point2D.centroid(toPoint2D(list2));
-				
-				double distance1 = Point2D.distance(centroid1, lastArea.getCentroid());
-				double distance2 = Point2D.distance(centroid2, lastArea.getCentroid());
-				
-				if (distance1 < distance2) {
-					//object 1 is our guy
-					trackingArea.removePoints(list2);
-					
-				} else {
-					//object 2 is our guy
-					trackingArea.removePoints(list1);
-				}
+//			System.out.println("Object Reappeared!");
+			trackingArea.setSameColorOcclusion(false);
+			// Object has reappeared
+			startPoint = set.iterator().next();
+			List<Point> newList = bfs(set, startPoint, trackingArea);
+//			System.out.println("Elements new: " + newList.size());
+
+			Point2D centroid1 = Point2D.centroid(toPoint2D(currentList));
+			Point2D centroid2 = Point2D.centroid(toPoint2D(newList));
+
+			double distance1 = Point2D.distance(centroid1,
+					lastArea.getCentroid());
+			double distance2 = Point2D.distance(centroid2,
+					lastArea.getCentroid());
+
+			if ((distance1 < distance2 && !trackingArea.isOccludedByLarger())
+					|| (distance1 > distance2 && trackingArea.isOccludedByLarger())) {
+				// currentList is our guy
+				trackingArea.removePoints(newList);
+
+			} else {
+				// newList is our guy
+				trackingArea.removePoints(currentList);
+				currentList = newList;
 			}
 		}
-		
 		return trackingArea;
 	}
 
-	private List<Point> bfs(HashSet<Point> set, Point startPoint, TrackingArea trackingArea) {
-		Queue<Point> queue = new LinkedList<Point>();
-		List<Point> list = new LinkedList<Point>();
-		queue.add(startPoint);
+	private List<Point> bfs(HashSet<Point> set, Point startPoint,
+			TrackingArea trackingArea) {
+		Deque<Point> queue = new ArrayDeque<Point>();
+		Set<Point> visited = new HashSet<Point>();
+		queue.offer(startPoint);
 		Point point;
+		Point aux = new Point(0, 0);
 		while (!queue.isEmpty()) {
-			System.out.println("Fuck!");
 			point = queue.poll();
-			if (!list.contains(point)) {
-				list.add(point);
+			if (!visited.contains(point)) {
+				visited.add(point);
 				set.remove(point);
-			}			
+			} else {
+				continue;
+			}
 
-			for (Point p: point.N4()) {
-				if (trackingArea.belongsToObject(p) && !list.contains(point)) {
-					System.out.println("Adding: " + p);
-					queue.add(p);
+			for (int[] dir  : TrackingArea.DIRECTIONS) {
+				aux.x = point.x + dir[0];
+				aux.y = point.y + dir[1];
+				if (trackingArea.belongsToObject(aux) && !visited.contains(aux)) {
+					queue.offer(new Point(aux.x, aux.y));
 				}
 			}
 		}
-		return list;
+		return new ArrayList<Point>(visited);
 	}
 
 	@Override
-	public void simpleOcclussionTracking(TrackingStats stats) {	
-		TrackingArea trackingArea = new TrackingArea(stats.getLastSelection(), red, blue, green, stats.getAvgIn(), stats.getAvgOut());
-		
+	public void simpleOcclussionTracking(TrackingStats stats) {
+		TrackingArea trackingArea = new TrackingArea(stats.getLastSelection(),
+				red, blue, green, stats.getAvgIn(), stats.getAvgOut());
+
 		stats.setAvgIn(trackingArea.getAverageIn());
 		stats.setAvgOut(trackingArea.getAverageOut());
 		List<Point> affectedPoints = new ArrayList<Point>();
-		while(!trackingArea.stoppingCondition()){
+		while (!trackingArea.stoppingCondition()) {
 			for (Point p : trackingArea.limitOut()) {
 				if (trackingArea.f(p) > 0) {
 					affectedPoints.add(p);
@@ -886,13 +942,14 @@ public class RGBImage implements Image{
 		markPoints(Color.MAGENTA, finalArea);
 		stats.addSelection(finalArea);
 		if (stats.isObjectLost()) {
-			stats.addSelection(trackingArea.getExpandedArea(stats.getLastCenter()));
+			stats.addSelection(trackingArea.getExpandedArea(stats
+					.getLastCenter()));
 			stats.setLastCenter(trackingArea.getCenter());
 			// eye candy
 			markPoints(Color.CYAN, trackingArea.getExpandedAreaLimits());
 		}
 	}
-	
+
 	private void markPoints(Color markingColor, List<Point> points) {
 		for (Point p : points) {
 			red.setPixel(p.x, p.y, markingColor.getRed());
@@ -914,13 +971,14 @@ public class RGBImage implements Image{
 	@Override
 	public void paint(List<Point> points, Color color) {
 		for (Point p : points) {
-			if (p.x < 0 || p.x >= red.getWidth() || p.y < 0 || p.y >= getHeight()) {
+			if (p.x < 0 || p.x >= red.getWidth() || p.y < 0
+					|| p.y >= getHeight()) {
 				System.out.printf("Invalid Pixel: %d, %d\n", p.x, p.y);
 			} else {
 				setRGBPixel(p.x, p.y, color.getRGB());
 			}
 		}
-		
+
 	}
-	
+
 }
