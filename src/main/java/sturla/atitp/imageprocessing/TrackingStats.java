@@ -66,7 +66,9 @@ public class TrackingStats {
 	
 	
 	public void setLastCenter(double[] lastCenter) {
-		this.lastCenter = lastCenter;
+		if (lastCenter != null) {
+			this.lastCenter = lastCenter;			
+		}
 	}
 	
 	public double[] getLastCenter() {

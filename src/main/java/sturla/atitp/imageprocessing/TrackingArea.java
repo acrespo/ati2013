@@ -9,7 +9,7 @@ import math.geom2d.Point2D;
 
 public class TrackingArea {
 	
-	private static final int EXPANDED_AREA_RADIUS = 50;
+	private static final int EXPANDED_AREA_RADIUS = 30;
 	
 	static int[][] DIRECTIONS = { {-1, 0}, {1, 0}, {0, -1}, {0, 1}};
 	
@@ -330,10 +330,12 @@ public class TrackingArea {
 			center[0] = avgX;
 			center[1] = avgY;			
 		} else {
+			System.out.println("using default center");
 			center[0] = lastCenter[0];
 			center[1] = lastCenter[1];
+			avgX = (int) center[0];
+			avgY = (int) center[1];
 		}
-		
 		for (int w = - EXPANDED_AREA_RADIUS; w <= EXPANDED_AREA_RADIUS; w ++) {
 			for (int h = Math.abs(w) - EXPANDED_AREA_RADIUS ; h <=  EXPANDED_AREA_RADIUS - Math.abs(w); h ++) {
 				int currW = avgX + w;
@@ -353,20 +355,8 @@ public class TrackingArea {
 	
 	public List<Point> getExpandedAreaLimits() {
 		List<Point> ret = new ArrayList<Point>();
-		int avgX = 0;
-		int avgY = 0;
-		int n = 0;
-		for (int w = 0; w < width; w ++) {
-			for (int h = 0; h < height; h ++) {
-				if (phi[w][h] < 0) {
-					n++;
-					avgX += w;
-					avgY += h;
-				}
-			}
-		}
-		avgX /= n;
-		avgY /= n;
+		int avgX = (int) center[0];
+		int avgY = (int) center[1];
 		
 		for (int w = - EXPANDED_AREA_RADIUS; w <= EXPANDED_AREA_RADIUS; w ++) {
 			int h1 =  Math.abs(w) - EXPANDED_AREA_RADIUS + avgY;
@@ -427,5 +417,6 @@ public class TrackingArea {
 	public boolean isSameColorOcclusion() {
 		return sameColorOcclusion;
 	}
+	
 	
 }

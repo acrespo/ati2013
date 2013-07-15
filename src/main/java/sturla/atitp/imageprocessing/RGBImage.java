@@ -907,9 +907,9 @@ public class RGBImage implements Image {
 
 	@Override
 	public void simpleOcclussionTracking(TrackingStats stats) {
+		
 		TrackingArea trackingArea = new TrackingArea(stats.getLastSelection(),
 				red, blue, green, stats.getAvgIn(), stats.getAvgOut());
-
 		stats.setAvgIn(trackingArea.getAverageIn());
 		stats.setAvgOut(trackingArea.getAverageOut());
 		List<Point> affectedPoints = new ArrayList<Point>();
