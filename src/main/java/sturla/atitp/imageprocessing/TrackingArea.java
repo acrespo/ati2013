@@ -9,8 +9,6 @@ import math.geom2d.Point2D;
 
 public class TrackingArea {
 	
-	private static final int EXPANDED_AREA_RADIUS = 30;
-	
 	static int[][] DIRECTIONS = { {-1, 0}, {1, 0}, {0, -1}, {0, 1}};
 	
 	private static int GAUSS_MASK_SIZE = 5;
@@ -309,7 +307,7 @@ public class TrackingArea {
 		return averageOut;
 	}
 	
-	public List<Point> getExpandedArea(double[] lastCenter) {
+	public List<Point> getExpandedArea(double[] lastCenter, int radius) {
 		List<Point> ret = new ArrayList<Point>();
 		int avgX = 0;
 		int avgY = 0;
@@ -336,8 +334,8 @@ public class TrackingArea {
 			avgX = (int) center[0];
 			avgY = (int) center[1];
 		}
-		for (int w = - EXPANDED_AREA_RADIUS; w <= EXPANDED_AREA_RADIUS; w ++) {
-			for (int h = Math.abs(w) - EXPANDED_AREA_RADIUS ; h <=  EXPANDED_AREA_RADIUS - Math.abs(w); h ++) {
+		for (int w = - radius; w <= radius; w ++) {
+			for (int h = Math.abs(w) - radius ; h <=  radius - Math.abs(w); h ++) {
 				int currW = avgX + w;
 				int currH = avgY + h;
 				if (!outOfBounds(currW, currH)) {
@@ -353,14 +351,14 @@ public class TrackingArea {
 		return center;
 	}
 	
-	public List<Point> getExpandedAreaLimits() {
+	public List<Point> getExpandedAreaLimits(int radius) {
 		List<Point> ret = new ArrayList<Point>();
 		int avgX = (int) center[0];
 		int avgY = (int) center[1];
 		
-		for (int w = - EXPANDED_AREA_RADIUS; w <= EXPANDED_AREA_RADIUS; w ++) {
-			int h1 =  Math.abs(w) - EXPANDED_AREA_RADIUS + avgY;
-			int h2 = EXPANDED_AREA_RADIUS - Math.abs(w) + avgY;
+		for (int w = - radius; w <= radius; w ++) {
+			int h1 =  Math.abs(w) - radius + avgY;
+			int h2 = radius - Math.abs(w) + avgY;
 			int currW = avgX + w;
 			if (!outOfBounds(currW, h1)) {
 				ret.add(new Point(currW, h1));

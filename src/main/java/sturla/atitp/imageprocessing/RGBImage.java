@@ -803,27 +803,25 @@ public class RGBImage implements Image {
 					&& !trackingArea.hasSameColorOcclusion()) {
 //				System.out.println("Distance "
 //						+ centroid.distance(lastArea.getCentroid()));
-				if (centroid.distance(lastArea.getCentroid()) > 30) {
+				if (centroid.distance(lastArea.getCentroid()) > 20) {
 					System.out.println("Occlusion!");
 					trackingArea.setSameColorOcclusion(true);
 					trackingArea.setOccludedByLarger(lastArea.getFinalArea().size() * 2 < trackingArea.getFinalArea().size());
 					System.out.println(trackingArea.isOccludedByLarger());
 				}
 			}
-			Point centroidPoint = list.get(list.indexOf(new Point(
-					(int) centroid.x(), (int) centroid.y())));
 			markingColor = Color.BLUE;
-			red.setPixel(centroidPoint.x, centroidPoint.y,
+			java.awt.Point p = centroid.getAsInt();
+			red.setPixel(p.x, p.y,
 					markingColor.getRed());
-			blue.setPixel(centroidPoint.x, centroidPoint.y,
+			blue.setPixel(p.x, p.y,
 					markingColor.getBlue());
-			green.setPixel(centroidPoint.x, centroidPoint.y,
+			green.setPixel(p.x, p.y,
 					markingColor.getGreen());
 			trackingArea.setCentroid(centroid);
 
-			if (trackingArea.hasSameColorOcclusion()) {
+			if (lastArea != null)
 				trackingArea = reappearance(trackingArea, lastArea);
-			}
 		}
 		return trackingArea;
 	}
@@ -943,10 +941,11 @@ public class RGBImage implements Image {
 		stats.addSelection(finalArea);
 		if (stats.isObjectLost()) {
 			stats.addSelection(trackingArea.getExpandedArea(stats
-					.getLastCenter()));
+					.getLastCenter(), stats.getSearchSize()));
 			stats.setLastCenter(trackingArea.getCenter());
 			// eye candy
-			markPoints(Color.CYAN, trackingArea.getExpandedAreaLimits());
+			markPoints(Color.CYAN, trackingArea.getExpandedAreaLimits(
+					stats.getSearchSize()));
 		}
 	}
 

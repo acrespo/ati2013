@@ -6,6 +6,8 @@ public class TrackingStats {
 
 	private double mu;
 	
+	private int searchSize;
+	
 	private int quant = 0;
 	private int acum = 0;
 	
@@ -18,8 +20,13 @@ public class TrackingStats {
 	private double[] avgIn;
 	private double[] avgOut;
 	
-	public TrackingStats(double mu) {
+	public TrackingStats(double mu, int size) {
 		this.mu = mu;
+		searchSize = size;
+	}
+	
+	public int getSearchSize() {
+		return searchSize;
 	}
 	
 	public void setAvgIn(double[] avgIn) {

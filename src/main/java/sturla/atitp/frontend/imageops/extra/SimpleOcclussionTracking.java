@@ -35,7 +35,7 @@ public class SimpleOcclussionTracking extends ImageOperation {
 			ImageOperationParameters params) {
 		
 		this.result = pResult;
-		stats = new TrackingStats(params.value);
+		stats = new TrackingStats(params.value, params.maskSize);
 		ActionListener trackNewImageAction = new ActionListener() {
 	    	@Override
 	    	public void actionPerformed(ActionEvent ae) {
